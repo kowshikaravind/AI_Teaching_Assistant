@@ -78,6 +78,27 @@ function StudentAnalysis() {
     navigate(`/student-details/${studentId}/${selectedClass}`);
   };
 
+  const handleDeleteStudent = async (e, studentId, studentName) => {
+    e.stopPropagation(); // Prevents the row click from firing
+    
+    const isConfirmed = window.confirm(`Are you sure you want to completely delete ${studentName}?`);
+    
+    if (isConfirmed) {
+      try {
+        const res = await fetch(`http://127.0.0.1:8000/api/students/${studentId}/`, {
+          method: "DELETE",
+        });
+
+        if (res.ok) {
+          fetchData(); // Instantly refresh the table
+        } else {
+          alert("Failed to delete student. Check the console.");
+        }
+      } catch (err) {
+        console.error("Error deleting student:", err);
+      }
+    }
+  };
   return (
     <div className="app-container">
       
@@ -152,7 +173,7 @@ function StudentAnalysis() {
                         <span style={{ color: "#999" }}>-</span>
                       )}
                     </td>
-                    <td>
+                    <td style={{ display: "flex", gap: "10px", alignItems: "center" }}>
                       <button 
                         className="add-mark-btn"
                         onClick={(e) => {
@@ -161,6 +182,13 @@ function StudentAnalysis() {
                         }}
                       >
                         + Add Mark
+                      </button>
+
+                      <button 
+                        onClick={(e) => handleDeleteStudent(e, student.id, student.name)}
+                        style={{ padding: "5px 10px", backgroundColor: "#ef4444", color: "white", border: "none", borderRadius: "5px", cursor: "pointer", fontWeight: "bold" }}
+                      >
+                        🗑️ Delete
                       </button>
                     </td>
                   </tr>
