@@ -1,13 +1,19 @@
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import '../App.css';
-
 function StudentAnalysis() {
   const navigate = useNavigate();
   const { className: classNameParam } = useParams();
+  
   const [students, setStudents] = useState([]);
-  const [selectedClass, setSelectedClass] = useState("");
+  const [activeTab, setActiveTab] = useState(classNameParam || "All Students");
+  const [searchQuery, setSearchQuery] = useState("");
+  
+  // Pagination State
+  const [currentPage, setCurrentPage] = useState(1);
+  const studentsPerPage = 8;
 
+  // --- FETCH DATA ---
   const fetchData = useCallback(async () => {
     try {
       const res = await fetch("http://127.0.0.1:8000/api/students/");
@@ -22,182 +28,219 @@ function StudentAnalysis() {
     fetchData();
   }, [fetchData]);
 
-  useEffect(() => {
-    if (classNameParam) {
-      setSelectedClass(classNameParam);
-    } else if (students.length > 0) {
-      setSelectedClass(students[0].class_name);
-    }
-  }, [classNameParam, students]);
-
+  // --- TABS LOGIC ---
   const uniqueClasses = useMemo(() => {
     const classes = [...new Set(students.map(s => s.class_name))];
-    return classes.sort();
+    return ["All Students", ...classes.sort(), "Graduates"];
   }, [students]);
 
-  const displayStudents = useMemo(() => {
-    if (!selectedClass) return [];
-    return students.filter(s => s.class_name === selectedClass);
-  }, [selectedClass, students]);
+  // --- FILTERING & SEARCH LOGIC ---
+  const filteredStudents = useMemo(() => {
+    let filtered = students;
 
+    // Filter by Tab
+    if (activeTab !== "All Students" && activeTab !== "Graduates") {
+      filtered = filtered.filter(s => s.class_name === activeTab);
+    } else if (activeTab === "Graduates") {
+      filtered = []; // Placeholder for now
+    }
+
+    // Filter by Search Query
+    if (searchQuery.trim()) {
+      const lowerQuery = searchQuery.toLowerCase();
+      filtered = filtered.filter(s => 
+        s.name.toLowerCase().includes(lowerQuery) || 
+        s.roll_number.toLowerCase().includes(lowerQuery)
+      );
+    }
+
+    return filtered;
+  }, [students, activeTab, searchQuery]);
+
+  // --- PAGINATION LOGIC ---
+  const totalStudents = filteredStudents.length;
+  const totalPages = Math.ceil(totalStudents / studentsPerPage);
+  
+  const paginatedStudents = useMemo(() => {
+    const startIndex = (currentPage - 1) * studentsPerPage;
+    return filteredStudents.slice(startIndex, startIndex + studentsPerPage);
+  }, [filteredStudents, currentPage]);
+
+  // --- PERFORMANCE CALCULATOR ---
   const getStudentAverage = (testMarksArray) => {
     if (!testMarksArray || testMarksArray.length === 0) return null;
-    
     let totalObtained = 0;
     let totalMax = 0;
-    
     testMarksArray.forEach(test => {
       totalObtained += Number(test.marks_obtained);
       totalMax += Number(test.total_marks);
     });
-
     if (totalMax === 0) return 0;
-    
-    return ((totalObtained / totalMax) * 100).toFixed(1);
+    return Math.round((totalObtained / totalMax) * 100);
   };
 
-  const classAverage = useMemo(() => {
-    if (displayStudents.length === 0) return 0;
-    
-    let totalClassPercentage = 0;
-    let studentsWithMarksCount = 0;
-
-    displayStudents.forEach(student => {
-      const studentAvg = getStudentAverage(student.test_marks);
-      if (studentAvg !== null) {
-        totalClassPercentage += Number(studentAvg);
-        studentsWithMarksCount++;
-      }
-    });
-
-    if (studentsWithMarksCount === 0) return 0;
-    return (totalClassPercentage / studentsWithMarksCount).toFixed(2);
-  }, [displayStudents]);
-
-  const handleStudentClick = (studentId) => {
-    navigate(`/student-details/${studentId}/${selectedClass}`);
+  const handleProfileClick = (studentId, className) => {
+    navigate(`/student-details/${studentId}/${className}`);
   };
 
-  const handleDeleteStudent = async (e, studentId, studentName) => {
-    e.stopPropagation(); // Prevents the row click from firing
-    
-    const isConfirmed = window.confirm(`Are you sure you want to completely delete ${studentName}?`);
-    
-    if (isConfirmed) {
-      try {
-        const res = await fetch(`http://127.0.0.1:8000/api/students/${studentId}/`, {
-          method: "DELETE",
-        });
-
-        if (res.ok) {
-          fetchData(); // Instantly refresh the table
-        } else {
-          alert("Failed to delete student. Check the console.");
-        }
-      } catch (err) {
-        console.error("Error deleting student:", err);
-      }
-    }
-  };
   return (
-    <div className="app-container">
+    <div className="dashboard-layout">
       
-      <div style={{ marginBottom: "20px" }}>
-        <h2>Class Performance Analysis</h2>
-      </div>
-
-      <div className="tabs-container">
-        {uniqueClasses.map(clsName => (
-          <button
-            key={clsName}
-            onClick={() => {
-              setSelectedClass(clsName);
-              navigate(`/student-analysis/${clsName}`);
-            }}
-            className={selectedClass === clsName ? "active-tab-btn" : "tab-btn"}
-          >
-            {clsName}
-          </button>
-        ))}
-      </div>
-
-      {selectedClass && (
-        <div className="class-stats-box">
-          <div>
-            <h3 style={{ margin: 0, color: "#333" }}>{selectedClass} Overview</h3>
-            <span style={{ color: "#666", fontSize: "14px" }}>Total Students: {displayStudents.length}</span>
-          </div>
-          <div style={{ textAlign: "right" }}>
-            <span className="stat-label">Class Average</span>
-            <span className="stat-value">{classAverage}%</span>
+      {/* SIDEBAR */}
+      <aside className="sidebar">
+        <div className="sidebar-brand">
+          <div className="brand-logo-icon">🎓</div>
+          <div className="brand-text">
+            <h2>EduManage</h2>
+            <p>Teacher Portal</p>
           </div>
         </div>
-      )}
+        <nav className="sidebar-nav">
+          <a href="#" className="nav-item" onClick={() => navigate("/studentDB")}><span className="nav-icon">▦</span> Dashboard</a>
+          <a href="#" className="nav-item active"><span className="nav-icon">👥</span> Students</a>
+          <a href="#" className="nav-item"><span className="nav-icon">📘</span> Classes</a>
+          <a href="#" className="nav-item"><span className="nav-icon">📊</span> Reports</a>
+        </nav>
+      </aside>
 
-      <div className="table-container">
-        <table>
-          <thead>
-            <tr>
-              <th>Roll No</th>
-              <th>Student Name</th>
-              <th>Attendance</th>
-              <th>Avg Score</th>
-              <th>Action</th>
-            </tr>
-          </thead>
-          <tbody>
-            {displayStudents.length === 0 ? (
-              <tr><td colSpan="5" style={{ textAlign: "center", padding: "30px" }}>No students found.</td></tr>
-            ) : (
-              displayStudents.map(student => {
-                const studentAvg = getStudentAverage(student.test_marks); 
+      {/* MAIN CONTENT AREA */}
+      <main className="main-content">
+        
+        {/* TOP NAVBAR */}
+        <header className="top-navbar">
+          <div className="search-container">
+            <span className="search-icon">🔍</span>
+            <input 
+              type="text" 
+              placeholder="Search student by name or ID..." 
+              className="search-input"
+              value={searchQuery}
+              onChange={(e) => {
+                setSearchQuery(e.target.value);
+                setCurrentPage(1); // Reset to page 1 on search
+              }}
+            />
+          </div>
+          <div className="user-profile-section">
+            <div className="notification-bell">🔔</div>
+            <img src="https://i.pravatar.cc/150?img=47" alt="Profile" className="user-avatar" />
+          </div>
+        </header>
+
+        {/* DIRECTORY BODY */}
+        <div className="directory-body">
+          <div className="breadcrumb">Students &rsaquo; <b>Directory</b></div>
+          
+          <div className="page-header">
+            <h2>Student Directory</h2>
+            <p>Manage and monitor academic performance for {students.length} students.</p>
+          </div>
+
+          {/* CUSTOM TABS (Underlined Style) */}
+          <div className="directory-tabs">
+            {uniqueClasses.map(tab => (
+              <button
+                key={tab}
+                className={`dir-tab-btn ${activeTab === tab ? 'active' : ''}`}
+                onClick={() => {
+                  setActiveTab(tab);
+                  setCurrentPage(1); // Reset to page 1 on tab change
+                }}
+              >
+                {tab}
+              </button>
+            ))}
+          </div>
+
+          {/* GRID OF STUDENT CARDS */}
+          {paginatedStudents.length === 0 ? (
+            <div className="no-results-msg">No students found for this selection.</div>
+          ) : (
+            <div className="student-grid">
+              {paginatedStudents.map(student => {
+                const avg = getStudentAverage(student.test_marks);
                 
-                return (
-                  <tr 
-                    key={student.id} 
-                    onClick={() => handleStudentClick(student.id)} 
-                    className="clickable-row"
-                    style={{ cursor: "pointer" }}
-                  >
-                    <td><b>{student.roll_number}</b></td>
-                    <td>{student.name}</td>
-                    <td>
-                      <span className="status-good">N/A</span>
-                    </td>
-                    <td>
-                      {studentAvg !== null ? (
-                        <span className={studentAvg < 50 ? "status-bad" : "status-good"} style={{ fontWeight: "bold" }}>
-                          {studentAvg}%
-                        </span>
-                      ) : (
-                        <span style={{ color: "#999" }}>-</span>
-                      )}
-                    </td>
-                    <td style={{ display: "flex", gap: "10px", alignItems: "center" }}>
-                      <button 
-                        className="add-mark-btn"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          navigate(`/add-test-mark/${student.id}`);
-                        }}
-                      >
-                        + Add Mark
-                      </button>
+                // Determine badge color based on score
+                let badgeClass = "perf-badge-neutral";
+                if (avg !== null) {
+                  if (avg >= 90) badgeClass = "perf-badge-excellent"; // Green
+                  else if (avg >= 70) badgeClass = "perf-badge-good"; // Orange
+                  else badgeClass = "perf-badge-warning"; // Red
+                }
 
+                return (
+                  <div className="student-card" key={student.id}>
+                    {/* Performance Badge */}
+                    <div className={`perf-badge ${badgeClass}`}>
+                      {avg !== null ? `${avg}% Perf.` : "No Data"}
+                    </div>
+                    
+                    {/* Avatar Generation */}
+                    <img 
+                      src={`https://ui-avatars.com/api/?name=${student.name}&background=random&color=fff&size=80`} 
+                      alt={student.name} 
+                      className="student-avatar-lg" 
+                    />
+                    
+                    <h3 className="student-card-name">{student.name}</h3>
+                    <p className="student-card-id">ID: #{student.roll_number}</p>
+                    
+                    <div className="student-card-footer">
+                      <div className="card-class-info">
+                        <span>CLASS</span>
+                        <b>{student.class_name}</b>
+                      </div>
                       <button 
-                        onClick={(e) => handleDeleteStudent(e, student.id, student.name)}
-                        style={{ padding: "5px 10px", backgroundColor: "#ef4444", color: "white", border: "none", borderRadius: "5px", cursor: "pointer", fontWeight: "bold" }}
+                        className="view-profile-link"
+                        onClick={() => handleProfileClick(student.id, student.class_name)}
                       >
-                        🗑️ Delete
+                        View Profile &rarr;
                       </button>
-                    </td>
-                  </tr>
+                    </div>
+                  </div>
                 );
-              })
-            )}
-          </tbody>
-        </table>
-      </div>
+              })}
+            </div>
+          )}
+
+          {/* PAGINATION */}
+          {totalPages > 1 && (
+            <div className="pagination-container">
+              <span className="pagination-info">
+                Showing {(currentPage - 1) * studentsPerPage + 1} to {Math.min(currentPage * studentsPerPage, totalStudents)} of {totalStudents} students
+              </span>
+              <div className="pagination-controls">
+                <button 
+                  className="page-btn" 
+                  disabled={currentPage === 1}
+                  onClick={() => setCurrentPage(prev => prev - 1)}
+                >
+                  &lsaquo;
+                </button>
+                
+                {[...Array(totalPages)].map((_, index) => (
+                  <button 
+                    key={index + 1}
+                    className={`page-btn ${currentPage === index + 1 ? 'active' : ''}`}
+                    onClick={() => setCurrentPage(index + 1)}
+                  >
+                    {index + 1}
+                  </button>
+                ))}
+
+                <button 
+                  className="page-btn" 
+                  disabled={currentPage === totalPages}
+                  onClick={() => setCurrentPage(prev => prev + 1)}
+                >
+                  &rsaquo;
+                </button>
+              </div>
+            </div>
+          )}
+
+        </div>
+      </main>
     </div>
   );
 }

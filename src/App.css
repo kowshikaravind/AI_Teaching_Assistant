@@ -677,3 +677,240 @@ body {
 
 .cancel-no-btn:hover { background-color: #e2e8f0; }
 .cancel-yes-btn:hover { background-color: #dc2626; }
+
+
+/*-----------------------------Student Analysis Styles-----------------------------------*/
+
+/* Inherits .dashboard-layout, .sidebar, and .top-navbar from App.css */
+
+.directory-body {
+  padding: 32px 48px;
+  width: 1100px;
+  margin: 0 auto;
+}
+
+.breadcrumb {
+  font-size: 0.85rem;
+  color: #94a3b8;
+  margin-bottom: 24px;
+}
+
+.breadcrumb b { color: #0f172a; }
+
+.page-header h2 {
+  margin: 0 0 8px 0;
+  color: #0f172a;
+  font-size: 2rem;
+  font-weight: 800;
+}
+
+.page-header p {
+  color: #64748b;
+  margin: 0 0 32px 0;
+  font-size: 1rem;
+}
+
+/* --- TABS (Underline Style) --- */
+.directory-tabs {
+  display: flex;
+  gap: 24px;
+  border-bottom: 1px solid #e2e8f0;
+  margin-bottom: 32px;
+  overflow-x: auto;
+}
+
+.dir-tab-btn {
+  background: none;
+  border: none;
+  color: #64748b;
+  font-weight: 600;
+  font-size: 0.95rem;
+  padding: 0 0 12px 0;
+  cursor: pointer;
+  position: relative;
+}
+
+.dir-tab-btn:hover {
+  color: #0f172a;
+}
+
+.dir-tab-btn.active {
+  color: #f2683a; /* Orange */
+}
+
+/* The active orange underline */
+.dir-tab-btn.active::after {
+  content: '';
+  position: absolute;
+  bottom: -1px; /* Overlaps the border-bottom */
+  left: 0;
+  width: 100%;
+  height: 2px;
+  background-color: #f2683a;
+}
+
+/* --- STUDENT GRID --- */
+.student-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 24px;
+  margin-bottom: 40px;
+}
+
+.no-results-msg {
+  text-align: center;
+  padding: 60px;
+  background: white;
+  border-radius: 12px;
+  color: #64748b;
+  border: 1px dashed #cbd5e1;
+}
+
+/* --- STUDENT CARD --- */
+.student-card {
+  background: #ffffff;
+  border-radius: 16px;
+  padding: 24px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.04);
+  border: 1px solid #e2e8f0;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.student-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.08);
+}
+
+.student-avatar-lg {
+  width: 72px;
+  height: 72px;
+  border-radius: 50%;
+  object-fit: cover;
+  margin-bottom: 16px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+
+.student-card-name {
+  margin: 0 0 4px 0;
+  color: #0f172a;
+  font-size: 1.15rem;
+  font-weight: 700;
+}
+
+.student-card-id {
+  margin: 0 0 24px 0;
+  color: #94a3b8;
+  font-size: 0.85rem;
+}
+
+/* Performance Badges */
+.perf-badge {
+  position: absolute;
+  top: 24px;
+  right: 24px;
+  padding: 6px 10px;
+  border-radius: 6px;
+  font-size: 0.75rem;
+  font-weight: 700;
+}
+
+.perf-badge-excellent { background-color: #dcfce7; color: #16a34a; } /* Green */
+.perf-badge-good { background-color: #ffedd5; color: #ea580c; }      /* Orange */
+.perf-badge-warning { background-color: #fee2e2; color: #dc2626; }   /* Red */
+.perf-badge-neutral { background-color: #f1f5f9; color: #64748b; }   /* Gray */
+
+/* Card Footer */
+.student-card-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  width: 100%;
+  margin-top: auto;
+}
+
+.card-class-info {
+  display: flex;
+  flex-direction: column;
+}
+
+.card-class-info span {
+  font-size: 0.7rem;
+  color: #94a3b8;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  margin-bottom: 2px;
+}
+
+.card-class-info b {
+  color: #0f172a;
+  font-size: 1.1rem;
+}
+
+.view-profile-link {
+  background: none;
+  border: none;
+  color: #f2683a;
+  font-weight: 700;
+  font-size: 0.9rem;
+  cursor: pointer;
+  padding: 0;
+  transition: color 0.2s;
+}
+
+.view-profile-link:hover {
+  color: #c2410c;
+}
+
+/* --- PAGINATION --- */
+.pagination-container {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-top: 24px;
+  border-top: 1px solid #e2e8f0;
+}
+
+.pagination-info {
+  color: #64748b;
+  font-size: 0.9rem;
+}
+
+.pagination-controls {
+  display: flex;
+  gap: 8px;
+}
+
+.page-btn {
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: white;
+  border: 1px solid #cbd5e1;
+  border-radius: 8px;
+  color: #334155;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.page-btn:hover:not(:disabled) {
+  background: #f8fafc;
+  border-color: #94a3b8;
+}
+
+.page-btn.active {
+  background: #f2683a;
+  color: white;
+  border-color: #f2683a;
+}
+
+.page-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
