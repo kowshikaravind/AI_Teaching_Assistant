@@ -1,0 +1,202 @@
+/*--------------------Login Type------------------------*/
+.login-type-container{
+  height: 100vh;
+  background-color: #f0f2f5;
+  font-family: Arial, sans-serif;
+  text-align: start;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap:30px;
+  background: linear-gradient(135deg, #f0f2f5 0%, #bacdd6 50%, #f0f2f5 100%);
+}
+
+.logintype-heading-text{
+  display: flex;
+  flex-direction: column;
+}
+h2{
+  color: blue;
+  font-size: 36px;
+  margin-bottom: 0;
+}
+.heading-para{
+  font-size: 18px;
+  margin-top: 0;
+  color: gray;
+  text-align: center;
+}
+.logintype-btns{
+  display: flex;
+  gap: 20px;
+}
+.student-portal-btn ,.teacher-portal-btn{
+  background-color: white;
+  width: 480px;
+  height: 368px;
+  border-radius: 24px;
+  padding: 40px;
+  color: black;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  text-align: center;
+  font-size: 24px;
+  box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+
+
+/*------------------Login Page-------------------*/
+/* =========================================
+  FACULTY LOGIN PAGE STYLES
+========================================= */
+
+.login-page-wrapper {
+  /* This creates the dark blue background with the sharp white diagonal cut on the right */
+  background: linear-gradient(108deg, #131a29 72%, #ffffff 72.1%);
+  min-height: 100vh;
+  width: 100vw;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  overflow: hidden; /* Prevents scrollbars from the blur effects */
+  font-family: Arial, sans-serif;
+  margin: 0;
+  padding: 0;
+}
+
+/* --- Decorative Blurred Background Circles (Bokeh Effect) --- */
+.login-bokeh {
+  position: absolute;
+  border-radius: 50%;
+  background: rgba(59, 130, 246, 0.15); /* Soft blue */
+  filter: blur(60px);
+  z-index: 1;
+}
+.login-bokeh-1 { width: 300px; height: 300px; top: -50px; left: -50px; }
+.login-bokeh-2 { width: 200px; height: 200px; top: 40%; left: 20%; }
+.login-bokeh-3 { width: 250px; height: 250px; bottom: -50px; right: 30%; }
+
+/* --- The Main Login Card --- */
+.login-card {
+  background: white;
+  width: 100%;
+  max-width: 380px;
+  padding: 40px;
+  border-radius: 12px;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+  text-align: center;
+  z-index: 10; /* Keeps it above the blurred background circles */
+}
+
+/* --- Icon & Text Headers --- */
+.login-icon-container {
+  background-color: #3b82f6; /* Bright blue */
+  width: 56px;
+  height: 56px;
+  border-radius: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 20px auto;
+}
+.login-icon {
+  width: 32px;
+  height: 32px;
+  color: white;
+}
+.login-title {
+  color: #111827;
+  font-size: 24px;
+  font-weight: bold;
+  margin: 0 0 8px 0;
+}
+.login-subtitle {
+  color: #6b7280;
+  font-size: 14px;
+  line-height: 1.5;
+  margin: 0 0 30px 0;
+}
+.login-role-text {
+  color: #3b82f6;
+  font-weight: bold;
+}
+
+/* --- Form Elements --- */
+.login-form {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+.login-input {
+  padding: 14px 16px;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  font-size: 14px;
+  outline: none;
+  transition: border-color 0.2s;
+  background-color: #f9fafb; /* Very slight gray tint */
+}
+.login-input:focus {
+  border-color: #3b82f6;
+  background-color: white;
+}
+
+/* --- Links & Buttons --- */
+.login-forgot-container {
+  text-align: right;
+  margin-top: -6px;
+  margin-bottom: 4px;
+}
+.login-forgot-link {
+  color: #3b82f6;
+  font-size: 12px;
+  text-decoration: none;
+}
+.login-forgot-link:hover {
+  text-decoration: underline;
+}
+
+.login-submit-btn {
+  background-color: #4338ca; /* Matches the slightly deeper blue/purple gradient button */
+  background: linear-gradient(to right, #3b82f6, #4f46e5);
+  color: white;
+  border: none;
+  padding: 14px;
+  border-radius: 8px;
+  font-size: 15px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: opacity 0.2s;
+}
+.login-submit-btn:hover {
+  opacity: 0.9;
+}
+
+.login-back-btn {
+  background: none;
+  border: none;
+  color: #6b7280;
+  font-size: 13px;
+  font-weight: 600;
+  margin-top: 25px;
+  cursor: pointer;
+}
+.login-back-btn:hover {
+  color: #374151;
+}
+
+/* --- Footer --- */
+.login-footer {
+  position: absolute;
+  bottom: 25px;
+  color: #9ca3af;
+  font-size: 12px;
+  z-index: 10;
+  text-align: center;
+  width: 100%;
+}
