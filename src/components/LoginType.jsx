@@ -6,6 +6,9 @@ function LoginType(){
 
   return(
     <div className='login-type-container' >
+      <div className='create-account' >
+        <button className='create-account-btn' onClick={() => navigate("/create-account")}>Create Account</button>
+      </div>
       <div className='logintype-heading-text'>
         <h2>Academic Performance Tracker</h2>
         <p className='heading-para'>Welcome to the Academic Performance Tracker System</p>

@@ -11,6 +11,28 @@
   gap:30px;
   background: linear-gradient(135deg, #f0f2f5 0%, #bacdd6 50%, #f0f2f5 100%);
 }
+#root{
+  width: 100%;
+}
+.create-account{
+  display: flex;
+  justify-content: flex-end;
+  width: 100%;
+  z-index: 100;
+  margin-right: 30px;
+}
+.create-account-btn{
+  background-color: #4f46e5;
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: background-color 0.2s;
+
+}
 
 .logintype-heading-text{
   display: flex;
