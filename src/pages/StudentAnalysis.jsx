@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import '../App.css';
+import '../App.css'; // Or './StudentAnalysis.css' if you kept them separate
+
 function StudentAnalysis() {
   const navigate = useNavigate();
   const { className: classNameParam } = useParams();
@@ -95,12 +96,18 @@ function StudentAnalysis() {
             <p>Teacher Portal</p>
           </div>
         </div>
+        
         <nav className="sidebar-nav">
           <a href="#" className="nav-item" onClick={() => navigate("/studentDB")}><span className="nav-icon">▦</span> Dashboard</a>
           <a href="#" className="nav-item active"><span className="nav-icon">👥</span> Students</a>
           <a href="#" className="nav-item"><span className="nav-icon">📘</span> Classes</a>
           <a href="#" className="nav-item"><span className="nav-icon">📊</span> Reports</a>
         </nav>
+
+        {/* --- SETTINGS BUTTON (Restored) --- */}
+        <div className="sidebar-bottom">
+          <a href="#" className="nav-item"><span className="nav-icon">⚙️</span> Settings</a>
+        </div>
       </aside>
 
       {/* MAIN CONTENT AREA */}
@@ -121,8 +128,16 @@ function StudentAnalysis() {
               }}
             />
           </div>
+          
           <div className="user-profile-section">
             <div className="notification-bell">🔔</div>
+            
+            {/* --- USER PROFILE INFO (Restored) --- */}
+            <div className="user-info">
+              <span className="user-name">Sarah Jenkins</span>
+              <span className="user-role">Senior Educator</span>
+            </div>
+            
             <img src="https://i.pravatar.cc/150?img=47" alt="Profile" className="user-avatar" />
           </div>
         </header>
@@ -136,7 +151,7 @@ function StudentAnalysis() {
             <p>Manage and monitor academic performance for {students.length} students.</p>
           </div>
 
-          {/* CUSTOM TABS (Underlined Style) */}
+          {/* CUSTOM TABS */}
           <div className="directory-tabs">
             {uniqueClasses.map(tab => (
               <button
@@ -147,7 +162,8 @@ function StudentAnalysis() {
                   setCurrentPage(1); // Reset to page 1 on tab change
                 }}
               >
-                {tab}
+                {/* Removes brackets if they exist in your DB */}
+                {tab.replace(/[\]()]/g, '')}
               </button>
             ))}
           </div>

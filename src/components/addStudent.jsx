@@ -60,8 +60,8 @@ function AddStudent() {
     e.preventDefault();
     
     // Determine if we are creating new or updating existing
-    const url = isEditMode 
-      ? `http://127.0.0.1:8000/api/students/${existingData.id}/` 
+    const url = isEditMode
+      ? `http://127.0.0.1:8000/api/students/${existingData.id}/`
       : "http://127.0.0.1:8000/api/students/";
       
     const method = isEditMode ? "PUT" : "POST";
