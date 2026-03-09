@@ -90,7 +90,7 @@ function App() {
         <nav className="sidebar-nav">
           <a href="#" className="nav-item active"><span className="nav-icon">▦</span> Dashboard</a>
           <a href="#" className="nav-item" onClick={() => navigate("/student-analysis")}><span className="nav-icon">👥</span> Students</a>
-          <a href="#" className="nav-item"><span className="nav-icon">📘</span> Classes</a>
+          <a href="#" className="nav-item" onClick={() => navigate("/attendance")}><span className="nav-icon">�</span> Attendance</a>
           <a href="#" className="nav-item"><span className="nav-icon">📊</span> Reports</a>
           <a href="#" className="nav-item"><span className="nav-icon">✨</span> AI Insights</a>
         </nav>

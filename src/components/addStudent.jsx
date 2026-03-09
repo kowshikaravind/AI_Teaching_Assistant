@@ -99,7 +99,7 @@ function AddStudent() {
         <nav className="sidebar-nav">
           <a href="#" className="nav-item active" onClick={() => navigate("/studentDB")}><span className="nav-icon">▦</span> Dashboard</a>
           <a href="#" className="nav-item "><span className="nav-icon">👥</span> Students</a>
-          <a href="#" className="nav-item"><span className="nav-icon">📘</span> Classes</a>
+          <a href="#" className="nav-item"><span className="nav-icon">📘</span> Attendence</a>
           <a href="#" className="nav-item"><span className="nav-icon">📊</span> Reports</a>
         </nav>
       </aside>
