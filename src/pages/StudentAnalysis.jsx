@@ -85,27 +85,24 @@ function StudentAnalysis() {
         </div>
 
         <nav className="sidebar-nav">
-          <a className="nav-item" onClick={() => navigate("/studentDB")}>
+          <div className="nav-item" onClick={() => navigate("/studentDB")} style={{ cursor: 'pointer' }}>
             <span className="nav-icon">▦</span> Dashboard
-          </a>
-          <a className="nav-item active" onClick={() => navigate("/student-analysis")}>
+          </div>
+          <div className="nav-item active" onClick={() => navigate("/student-analysis")} style={{ cursor: 'pointer' }}>
             <span className="nav-icon">👥</span> Students
-          </a>
-          <a className="nav-item" onClick={() => navigate("/attendance")}>
-            <span className="nav-icon">�</span> Attendance
-          </a>
-          <a className="nav-item">
-            <span className="nav-icon">📊</span> Reports
-          </a>
-          <a className="nav-item">
+          </div>
+          <div className="nav-item" onClick={() => navigate("/attendance")} style={{ cursor: 'pointer' }}>
+            <span className="nav-icon">📋</span> Attendance
+          </div>
+          <div className="nav-item" onClick={() => navigate("/ai-insights")} style={{ cursor: 'pointer' }}>
             <span className="nav-icon">✨</span> AI Insights
-          </a>
+          </div>
         </nav>
 
         <div className="sidebar-bottom">
-          <a className="nav-item">
+          <div className="nav-item" style={{ cursor: 'pointer' }}>
             <span className="nav-icon">⚙️</span> Settings
-          </a>
+          </div>
         </div>
       </aside>
 

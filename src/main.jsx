@@ -10,6 +10,7 @@ import './App.css'
 import LoginType from './components/LoginType.jsx';
 import Login from './components/Login.jsx';
 import AttendanceSheet from './pages/AttendanceSheet.jsx';
+import AIInsights from './pages/AIinsights.jsx';
 
 createRoot(document.getElementById('root')).render(
     <BrowserRouter>
@@ -23,8 +24,9 @@ createRoot(document.getElementById('root')).render(
             <Route path="/student-details/:id/:className" element={<StudentDetails />} />
             <Route path="/student-details/:id" element={<StudentDetails />} />
             <Route path="/add-test-mark/:id" element={<AddTestMark />} />
-            <Route path="*" element={<Navigate to="/" replace />} />
             <Route path="/attendance" element={<AttendanceSheet />} />
+            <Route path="/ai-insights" element={<AIInsights />} />
+            <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
     </BrowserRouter>
 )

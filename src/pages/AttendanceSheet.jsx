@@ -9,6 +9,7 @@ function AttendanceSheet() {
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedClass, setSelectedClass] = useState("All");
   const [currentDate, setCurrentDate] = useState(new Date().toISOString().split('T')[0]);
+  const [savingId, setSavingId] = useState(null); // tracks which card is currently saving
 
   // ── FETCH STUDENTS ────────────────────────────────────────────
   useEffect(() => {
@@ -17,8 +18,6 @@ function AttendanceSheet() {
         const res = await fetch("http://127.0.0.1:8000/api/students/");
         const data = await res.json();
         setStudents(data);
-
-        // Default everyone to 'not_marked'
         const initial = {};
         data.forEach(s => { initial[s.id] = 'not_marked'; });
         setAttendanceState(initial);
@@ -29,35 +28,88 @@ function AttendanceSheet() {
     fetchStudents();
   }, []);
 
-  // ── UNIQUE CLASSES FOR FILTER ─────────────────────────────────
+  // ── LOAD SAVED ATTENDANCE WHEN DATE CHANGES ───────────────────
+  useEffect(() => {
+    if (!currentDate || students.length === 0) return;
+
+    const loadSavedAttendance = async () => {
+      try {
+        const res = await fetch(`http://127.0.0.1:8000/api/attendance/?date=${currentDate}`);
+        const data = await res.json();
+
+        const loaded = {};
+        students.forEach(s => { loaded[s.id] = 'not_marked'; });
+        if (data.records) {
+          data.records.forEach(r => { loaded[r.student_id] = r.status; });
+        }
+        setAttendanceState(loaded);
+      } catch (err) {
+        console.error("Error loading attendance:", err);
+      }
+    };
+
+    loadSavedAttendance();
+  }, [currentDate, students]);
+
+  // ── TOGGLE + AUTO SAVE ────────────────────────────────────────
+  // When teacher clicks a card:
+  // 1. Update the UI immediately
+  // 2. Save just that one student's new status to the backend
+  const toggleAttendance = async (studentId) => {
+    const current = attendanceState[studentId];
+    let next = 'present';
+    if (current === 'present') next = 'absent';
+    else if (current === 'absent') next = 'not_marked';
+
+    // Update UI immediately so it feels instant
+    setAttendanceState(prev => ({ ...prev, [studentId]: next }));
+
+    // Save just this student in the background
+    setSavingId(studentId);
+    try {
+      await fetch('http://127.0.0.1:8000/api/attendance/save/', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          date: currentDate,
+          records: [{ student_id: studentId, status: next }]
+        })
+      });
+    } catch (err) {
+      console.error("Auto-save failed:", err);
+    } finally {
+      setSavingId(null);
+    }
+  };
+
+  const markAll = async (status) => {
+    // Update UI first
+    const newState = {};
+    filteredStudents.forEach(s => { newState[s.id] = status; });
+    setAttendanceState(prev => ({ ...prev, ...newState }));
+
+    // Then save all of them
+    const records = filteredStudents.map(s => ({ student_id: s.id, status }));
+    try {
+      await fetch('http://127.0.0.1:8000/api/attendance/save/', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ date: currentDate, records })
+      });
+    } catch (err) {
+      console.error("Bulk save failed:", err);
+    }
+  };
+
+  // ── UNIQUE CLASSES ────────────────────────────────────────────
   const uniqueClasses = useMemo(() => {
     return ["All", ...new Set(students.map(s => s.class_name))];
   }, [students]);
 
-  // ── TOGGLE: only 3 states — not_marked → present → absent ────
-  const toggleAttendance = (studentId) => {
-    setAttendanceState(prev => {
-      const current = prev[studentId];
-      let next = 'present';
-      if (current === 'present') next = 'absent';
-      else if (current === 'absent') next = 'not_marked';
-      return { ...prev, [studentId]: next };
-    });
-  };
-
-  const markAll = (status) => {
-    const newState = {};
-    filteredStudents.forEach(s => { newState[s.id] = status; });
-    // Keep untouched students as they were
-    setAttendanceState(prev => ({ ...prev, ...newState }));
-  };
-
-  // ── FILTER by class + search ──────────────────────────────────
+  // ── FILTER ────────────────────────────────────────────────────
   const filteredStudents = useMemo(() => {
     let list = students;
-    if (selectedClass !== "All") {
-      list = list.filter(s => s.class_name === selectedClass);
-    }
+    if (selectedClass !== "All") list = list.filter(s => s.class_name === selectedClass);
     if (searchQuery.trim()) {
       const q = searchQuery.toLowerCase();
       list = list.filter(s =>
@@ -68,7 +120,7 @@ function AttendanceSheet() {
     return list;
   }, [students, selectedClass, searchQuery]);
 
-  // ── STATS (based on filtered students only) ───────────────────
+  // ── STATS ─────────────────────────────────────────────────────
   const stats = useMemo(() => {
     const total = filteredStudents.length;
     const present = filteredStudents.filter(s => attendanceState[s.id] === 'present').length;
@@ -78,7 +130,6 @@ function AttendanceSheet() {
     return { total, present, absent, notMarked, attendancePct };
   }, [filteredStudents, attendanceState]);
 
-  // ── STATUS LABEL & STYLE HELPERS ─────────────────────────────
   const statusLabel = (status) => {
     if (status === 'present') return 'Present';
     if (status === 'absent') return 'Absent';
@@ -104,14 +155,13 @@ function AttendanceSheet() {
           </div>
         </div>
         <nav className="sidebar-nav">
-          <a className="nav-item" onClick={() => navigate("/studentDB")}><span className="nav-icon">▦</span> Dashboard</a>
-          <a className="nav-item" onClick={() => navigate("/student-analysis")}><span className="nav-icon">👥</span> Students</a>
-          <a className="nav-item active"><span className="nav-icon">📋</span> Attendance</a>
-          <a className="nav-item"><span className="nav-icon">📊</span> Reports</a>
-          <a className="nav-item"><span className="nav-icon">✨</span> AI Insights</a>
+          <div className="nav-item" onClick={() => navigate("/studentDB")} style={{ cursor: 'pointer' }}><span className="nav-icon">▦</span> Dashboard</div>
+          <div className="nav-item" onClick={() => navigate("/student-analysis")} style={{ cursor: 'pointer' }}><span className="nav-icon">👥</span> Students</div>
+          <div className="nav-item active" style={{ cursor: 'pointer' }}><span className="nav-icon">📋</span> Attendance</div>
+          <div className="nav-item" onClick={() => navigate("/ai-insights")} style={{ cursor: 'pointer' }}><span className="nav-icon">✨</span> AI Insights</div>
         </nav>
         <div className="sidebar-bottom">
-          <a className="nav-item"><span className="nav-icon">⚙️</span> Settings</a>
+          <div className="nav-item" style={{ cursor: 'pointer' }}><span className="nav-icon">⚙️</span> Settings</div>
         </div>
       </aside>
 
@@ -130,7 +180,6 @@ function AttendanceSheet() {
           </div>
 
           <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-            {/* Date picker */}
             <input
               type="date"
               value={currentDate}
@@ -138,11 +187,10 @@ function AttendanceSheet() {
               style={{
                 padding: '8px 12px', border: '1px solid #e2e8f0',
                 borderRadius: 8, fontSize: 13, color: '#1e293b',
-                background: 'white', cursor: 'pointer'
+                background: 'gray', cursor: 'pointer'
               }}
             />
 
-            {/* Class filter */}
             <select
               value={selectedClass}
               onChange={e => setSelectedClass(e.target.value)}
@@ -152,36 +200,31 @@ function AttendanceSheet() {
                 background: 'white', cursor: 'pointer', minWidth: 150
               }}
             >
-              {uniqueClasses.map(c => (
-                <option key={c} value={c}>{c}</option>
-              ))}
+              {uniqueClasses.map(c => <option key={c} value={c}>{c}</option>)}
             </select>
 
-            {/* Save button — wired up later when backend is ready */}
-            <button
-              style={{
-                padding: '9px 20px', background: 'linear-gradient(135deg,#6366f1,#8b5cf6)',
-                color: 'white', border: 'none', borderRadius: 8,
-                fontWeight: 600, fontSize: 13, cursor: 'pointer'
-              }}
-            >
-              💾 Save Attendance
-            </button>
+            {/* No save button — auto saves on click */}
+            <div style={{
+              padding: '9px 16px', background: '#f0fdf4',
+              border: '1px solid #bbf7d0', borderRadius: 8,
+              fontSize: 12, color: '#16a34a', fontWeight: 600
+            }}>
+              Auto-saving
+            </div>
 
-            {/* Profile */}
             <img src="https://i.pravatar.cc/150?img=47" alt="Profile" className="user-avatar" />
           </div>
         </header>
 
         <div className="dashboard-body">
 
-          {/* STATS ROW */}
+          {/* STATS */}
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4,1fr)', gap: 16, marginBottom: 24 }}>
             {[
-              { label: 'Total Students', value: stats.total, color: '#6366f1', bg: 'rgba(99,102,241,0.08)', icon: '👥' },
-              { label: 'Present', value: stats.present, color: '#10b981', bg: 'rgba(16,185,129,0.08)', icon: '✅' },
-              { label: 'Absent', value: stats.absent, color: '#ef4444', bg: 'rgba(239,68,68,0.08)', icon: '❌' },
-              { label: 'Not Marked', value: stats.notMarked, color: '#f59e0b', bg: 'rgba(245,158,11,0.08)', icon: '⏳' },
+              { label: 'Total Students', value: stats.total,     color: '#6366f1', bg: 'rgba(99,102,241,0.08)',  icon: '👥' },
+              { label: 'Present',        value: stats.present,   color: '#10b981', bg: 'rgba(16,185,129,0.08)', icon: '✅' },
+              { label: 'Absent',         value: stats.absent,    color: '#ef4444', bg: 'rgba(239,68,68,0.08)',  icon: '❌' },
+              { label: 'Not Marked',     value: stats.notMarked, color: '#f59e0b', bg: 'rgba(245,158,11,0.08)', icon: '⏳' },
             ].map((s, i) => (
               <div key={i} style={{
                 background: 'white', borderRadius: 12, padding: '18px 20px',
@@ -226,24 +269,20 @@ function AttendanceSheet() {
             <div style={{ display: 'flex', gap: 8 }}>
               <button onClick={() => markAll('present')} style={{
                 padding: '8px 16px', background: 'rgba(16,185,129,0.1)', color: '#10b981',
-                border: '1px solid rgba(16,185,129,0.3)', borderRadius: 8, fontWeight: 600,
-                fontSize: 13, cursor: 'pointer'
+                border: '1px solid rgba(16,185,129,0.3)', borderRadius: 8, fontWeight: 600, fontSize: 13, cursor: 'pointer'
               }}>✔ Mark All Present</button>
 
               <button onClick={() => markAll('absent')} style={{
                 padding: '8px 16px', background: 'rgba(239,68,68,0.1)', color: '#ef4444',
-                border: '1px solid rgba(239,68,68,0.3)', borderRadius: 8, fontWeight: 600,
-                fontSize: 13, cursor: 'pointer'
+                border: '1px solid rgba(239,68,68,0.3)', borderRadius: 8, fontWeight: 600, fontSize: 13, cursor: 'pointer'
               }}>✖ Mark All Absent</button>
 
               <button onClick={() => markAll('not_marked')} style={{
                 padding: '8px 16px', background: '#f8fafc', color: '#64748b',
-                border: '1px solid #e2e8f0', borderRadius: 8, fontWeight: 600,
-                fontSize: 13, cursor: 'pointer'
+                border: '1px solid #e2e8f0', borderRadius: 8, fontWeight: 600, fontSize: 13, cursor: 'pointer'
               }}>↺ Reset</button>
             </div>
 
-            {/* Search */}
             <div style={{ position: 'relative' }}>
               <span style={{ position: 'absolute', left: 12, top: '50%', transform: 'translateY(-50%)', fontSize: 14 }}>🔍</span>
               <input
@@ -259,30 +298,25 @@ function AttendanceSheet() {
             </div>
           </div>
 
-          {/* STUDENT CARDS GRID */}
-          <div style={{
-            display: 'grid',
-            gridTemplateColumns: 'repeat(auto-fill, minmax(230px, 1fr))',
-            gap: 12
-          }}>
+          {/* STUDENT CARDS */}
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(230px, 1fr))', gap: 12 }}>
             {filteredStudents.length === 0 ? (
-              <p style={{ color: '#94a3b8', gridColumn: '1/-1', textAlign: 'center', padding: 40 }}>
-                No students found.
-              </p>
+              <p style={{ color: '#94a3b8', gridColumn: '1/-1', textAlign: 'center', padding: 40 }}>No students found.</p>
             ) : (
               filteredStudents.map(student => {
                 const status = attendanceState[student.id] || 'not_marked';
+                const isSaving = savingId === student.id;
 
                 const cardStyle = {
-                  present: { border: '2px solid #10b981', background: 'rgba(16,185,129,0.05)' },
-                  absent:  { border: '2px solid #ef4444', background: 'rgba(239,68,68,0.05)' },
-                  not_marked: { border: '2px solid #e2e8f0', background: 'white' },
+                  present:    { border: '2px solid #10b981', background: 'rgba(16,185,129,0.05)' },
+                  absent:     { border: '2px solid #ef4444', background: 'rgba(239,68,68,0.05)'  },
+                  not_marked: { border: '2px solid #e2e8f0', background: 'white'                  },
                 };
 
                 const badgeStyle = {
-                  present: { background: '#10b981', color: 'white' },
-                  absent:  { background: '#ef4444', color: 'white' },
-                  not_marked: { background: '#f1f5f9', color: '#94a3b8' },
+                  present:    { background: '#10b981', color: 'white'    },
+                  absent:     { background: '#ef4444', color: 'white'    },
+                  not_marked: { background: '#f1f5f9', color: '#94a3b8'  },
                 };
 
                 return (
@@ -295,6 +329,7 @@ function AttendanceSheet() {
                       display: 'flex', alignItems: 'center',
                       justifyContent: 'space-between',
                       cursor: 'pointer', transition: 'all 0.18s ease',
+                      opacity: isSaving ? 0.6 : 1,
                     }}
                   >
                     <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
@@ -309,15 +344,14 @@ function AttendanceSheet() {
                       </div>
                     </div>
 
-                    {/* Status badge */}
                     <div style={{
                       ...badgeStyle[status],
                       padding: '4px 10px', borderRadius: 20,
                       fontSize: 11, fontWeight: 700,
                       display: 'flex', alignItems: 'center', gap: 4
                     }}>
-                      <span>{statusIcon(status)}</span>
-                      <span>{statusLabel(status)}</span>
+                      <span>{isSaving ? '⏳' : statusIcon(status)}</span>
+                      <span>{isSaving ? 'Saving...' : statusLabel(status)}</span>
                     </div>
                   </div>
                 );
