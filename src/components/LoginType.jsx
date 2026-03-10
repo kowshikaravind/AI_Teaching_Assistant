@@ -15,7 +15,7 @@ function LoginType(){
       </div>
       <div className='logintype-btns' >
         <div className='student-portal' >
-          <button className='student-portal-btn' >Student Portal</button>
+          <button className='student-portal-btn' onClick={() => navigate("/login")}>Student Portal</button>
         </div>
         <div className='teacher-portal' >
           <button className='teacher-portal-btn' onClick={() => navigate("/login")}>Teacher Portal</button>

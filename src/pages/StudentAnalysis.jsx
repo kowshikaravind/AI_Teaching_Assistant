@@ -14,6 +14,13 @@ function StudentAnalysis() {
   const [currentPage, setCurrentPage] = useState(1);
   const studentsPerPage = 8;
 
+  // ── SUBJECT MODAL STATE ───────────────────────────────────────
+  const [showSubjectModal, setShowSubjectModal] = useState(false);
+  const [allSubjects, setAllSubjects] = useState([]);
+  const [newSubjectInput, setNewSubjectInput] = useState("");
+  const [subjectError, setSubjectError] = useState("");
+
+  // ── FETCH STUDENTS ────────────────────────────────────────────
   const fetchData = useCallback(async () => {
     try {
       const res = await fetch("http://127.0.0.1:8000/api/students/");
@@ -26,17 +33,61 @@ function StudentAnalysis() {
 
   useEffect(() => { fetchData(); }, [fetchData]);
 
+  // ── FETCH SUBJECTS FROM DB ────────────────────────────────────
+  const fetchSubjects = useCallback(async () => {
+    try {
+      const res = await fetch("http://127.0.0.1:8000/api/subjects/");
+      const data = await res.json();
+      setAllSubjects(data); // [{id, name}, ...]
+    } catch (err) {
+      console.error("Error fetching subjects:", err);
+    }
+  }, []);
+
+  useEffect(() => { fetchSubjects(); }, [fetchSubjects]);
+
+  // ── ADD SUBJECT TO DB ─────────────────────────────────────────
+  const handleAddSubject = async () => {
+    const trimmed = newSubjectInput.trim();
+    if (!trimmed) { setSubjectError("Subject name cannot be empty."); return; }
+
+    try {
+      const res = await fetch("http://127.0.0.1:8000/api/subjects/", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ name: trimmed })
+      });
+      if (res.ok) {
+        setNewSubjectInput("");
+        setSubjectError("");
+        fetchSubjects();
+      } else {
+        setSubjectError("Subject already exists.");
+      }
+    } catch (err) {
+      setSubjectError("Failed to add subject.");
+    }
+  };
+
+  // ── DELETE SUBJECT FROM DB ────────────────────────────────────
+  const handleDeleteSubject = async (id) => {
+    try {
+      await fetch(`http://127.0.0.1:8000/api/subjects/${id}/`, { method: "DELETE" });
+      fetchSubjects();
+    } catch (err) {
+      console.error("Failed to delete subject:", err);
+    }
+  };
+
   const uniqueClasses = useMemo(() => {
     const classes = [...new Set(students.map(s => s.class_name))];
-    return ["All Students", ...classes.sort(), "Graduates"];
+    return ["All Students", ...classes.sort()];
   }, [students]);
 
   const filteredStudents = useMemo(() => {
     let filtered = students;
-    if (activeTab !== "All Students" && activeTab !== "Graduates") {
+    if (activeTab !== "All Students") {
       filtered = filtered.filter(s => s.class_name === activeTab);
-    } else if (activeTab === "Graduates") {
-      filtered = [];
     }
     if (searchQuery.trim()) {
       const lowerQuery = searchQuery.toLowerCase();
@@ -74,7 +125,7 @@ function StudentAnalysis() {
   return (
     <div className="dashboard-layout">
 
-      {/* SIDEBAR — identical structure and classes to App.jsx */}
+      {/* SIDEBAR */}
       <aside className="sidebar">
         <div className="sidebar-brand">
           <div className="brand-logo-icon">🎓</div>
@@ -83,7 +134,6 @@ function StudentAnalysis() {
             <p>Teacher Portal</p>
           </div>
         </div>
-
         <nav className="sidebar-nav">
           <div className="nav-item" onClick={() => navigate("/studentDB")} style={{ cursor: 'pointer' }}>
             <span className="nav-icon">▦</span> Dashboard
@@ -98,7 +148,6 @@ function StudentAnalysis() {
             <span className="nav-icon">✨</span> AI Insights
           </div>
         </nav>
-
         <div className="sidebar-bottom">
           <div className="nav-item" style={{ cursor: 'pointer' }}>
             <span className="nav-icon">⚙️</span> Settings
@@ -108,8 +157,6 @@ function StudentAnalysis() {
 
       {/* MAIN CONTENT */}
       <main className="main-content">
-
-        {/* TOP NAVBAR */}
         <header className="top-navbar">
           <div className="search-container">
             <span className="search-icon">🔍</span>
@@ -118,10 +165,7 @@ function StudentAnalysis() {
               placeholder="Search student by name or ID..."
               className="search-input"
               value={searchQuery}
-              onChange={(e) => {
-                setSearchQuery(e.target.value);
-                setCurrentPage(1);
-              }}
+              onChange={(e) => { setSearchQuery(e.target.value); setCurrentPage(1); }}
             />
           </div>
           <div className="user-profile-section">
@@ -134,13 +178,25 @@ function StudentAnalysis() {
           </div>
         </header>
 
-        {/* DIRECTORY BODY */}
         <div className="directory-body">
           <div className="breadcrumb">Students &rsaquo; <b>Directory</b></div>
 
-          <div className="page-header">
-            <h2>Student Directory</h2>
-            <p>Manage and monitor academic performance for {students.length} students.</p>
+          {/* PAGE HEADER WITH MANAGE SUBJECTS BUTTON */}
+          <div className="page-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+            <div>
+              <h2>Student Directory</h2>
+              <p>Manage and monitor academic performance for {students.length} students.</p>
+            </div>
+            <button
+              onClick={() => setShowSubjectModal(true)}
+              style={{
+                padding: '9px 18px',
+                background: 'linear-gradient(135deg,#6366f1,#8b5cf6)',
+                color: 'white', border: 'none', borderRadius: 8,
+                fontWeight: 600, fontSize: 13, cursor: 'pointer',
+                whiteSpace: 'nowrap', marginTop: 4
+              }}
+            >📚 Manage Subjects</button>
           </div>
 
           {/* TABS */}
@@ -170,7 +226,7 @@ function StudentAnalysis() {
                   else badgeClass = "perf-badge-warning";
                 }
                 return (
-                  <div className="student-card" key={student.id}>
+                  <div className="student-card" key={student.id} onClick={() => handleProfileClick(student.id, student.class_name)}>
                     <div className={`perf-badge ${badgeClass}`}>
                       {avg !== null ? `${avg}% Perf.` : "No Data"}
                     </div>
@@ -222,6 +278,107 @@ function StudentAnalysis() {
 
         </div>
       </main>
+
+      {/* ── MANAGE SUBJECTS MODAL ─────────────────────────────── */}
+      {showSubjectModal && (
+        <div style={{
+          position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.4)',
+          display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000
+        }}>
+          <div style={{
+            background: 'white', borderRadius: 16, padding: 28,
+            width: '100%', maxWidth: 480,
+            boxShadow: '0 20px 60px rgba(0,0,0,0.2)'
+          }}>
+            {/* Header */}
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 }}>
+              <div>
+                <h3 style={{ margin: 0, fontSize: 17, fontWeight: 700, color: '#1e293b' }}>📚 Manage Subjects</h3>
+                <p style={{ margin: '4px 0 0', fontSize: 12, color: '#94a3b8' }}>
+                  Subjects added here appear in the dropdown for all students.
+                </p>
+              </div>
+              <button
+                onClick={() => { setShowSubjectModal(false); setNewSubjectInput(""); setSubjectError(""); }}
+                style={{ background: 'none', border: 'none', fontSize: 20, cursor: 'pointer', color: '#94a3b8' }}
+              >✕</button>
+            </div>
+
+            {/* Add input */}
+            <div style={{ display: 'flex', gap: 8, marginBottom: 8 }}>
+              <input
+                type="text"
+                placeholder="e.g. Mathematics, Physics..."
+                value={newSubjectInput}
+                onChange={e => { setNewSubjectInput(e.target.value); setSubjectError(""); }}
+                onKeyDown={e => e.key === 'Enter' && handleAddSubject()}
+                style={{
+                  flex: 1, padding: '10px 14px',
+                  border: '1px solid #e2e8f0', borderRadius: 8,
+                  fontSize: 13, outline: 'none'
+                }}
+              />
+              <button
+                onClick={handleAddSubject}
+                style={{
+                  padding: '10px 18px',
+                  background: 'linear-gradient(135deg,#6366f1,#8b5cf6)',
+                  color: 'white', border: 'none', borderRadius: 8,
+                  fontWeight: 600, fontSize: 13, cursor: 'pointer'
+                }}
+              >Add</button>
+            </div>
+
+            {subjectError && (
+              <p style={{ margin: '0 0 10px', fontSize: 12, color: '#ef4444' }}>{subjectError}</p>
+            )}
+
+            {/* Subject list */}
+            <div style={{
+              maxHeight: 260, overflowY: 'auto',
+              border: '1px solid #f1f5f9', borderRadius: 10, marginTop: 12
+            }}>
+              {allSubjects.length === 0 ? (
+                <p style={{ padding: 20, textAlign: 'center', color: '#94a3b8', fontSize: 13 }}>
+                  No subjects yet. Add one above.
+                </p>
+              ) : (
+                allSubjects.map((subject, i) => (
+                  <div key={subject.id} style={{
+                    display: 'flex', justifyContent: 'space-between', alignItems: 'center',
+                    padding: '10px 16px',
+                    borderBottom: i < allSubjects.length - 1 ? '1px solid #f8fafc' : 'none',
+                    background: i % 2 === 0 ? '#fafafa' : 'white'
+                  }}>
+                    <span style={{ fontSize: 13, fontWeight: 500, color: '#1e293b' }}>{subject.name}</span>
+                    <button
+                      onClick={() => handleDeleteSubject(subject.id)}
+                      style={{
+                        background: 'rgba(239,68,68,0.1)', color: '#ef4444',
+                        border: 'none', borderRadius: 6,
+                        padding: '4px 10px', fontSize: 11,
+                        cursor: 'pointer', fontWeight: 600
+                      }}
+                    >Remove</button>
+                  </div>
+                ))
+              )}
+            </div>
+
+            {/* Done */}
+            <button
+              onClick={() => { setShowSubjectModal(false); setNewSubjectInput(""); setSubjectError(""); }}
+              style={{
+                width: '100%', marginTop: 18, padding: '11px',
+                background: '#f1f5f9', color: '#475569',
+                border: 'none', borderRadius: 8,
+                fontWeight: 600, fontSize: 13, cursor: 'pointer'
+              }}
+            >Done</button>
+          </div>
+        </div>
+      )}
+
     </div>
   );
 }

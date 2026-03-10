@@ -934,12 +934,12 @@ body {
 }
 
 .back-link {
-  background: none;
+  background:none;
   border: none;
   color: #64748b;
+  padding: 10px;
   font-size: 0.95rem;
   cursor: pointer;
-  padding: 0;
 }
 .back-link:hover { color: #0f172a; }
 

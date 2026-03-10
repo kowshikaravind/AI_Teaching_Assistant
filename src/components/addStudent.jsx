@@ -6,14 +6,13 @@ function AddStudent() {
   const navigate = useNavigate();
   const location = useLocation();
   
-  // Check if we arrived here by clicking "Edit"
   const isEditMode = location.state?.editMode || false;
   const existingData = location.state?.studentData || null;
 
-  // Your cancel confirmation state
   const [confirmCancel, setConfirmCancel] = useState(false);
+  const [existingClasses, setExistingClasses] = useState([]);
+  const [isNewClass, setIsNewClass] = useState(false); // toggle manual input
 
-  // Updated state to match the new backend fields exactly
   const [formData, setFormData] = useState({
     name: "",
     roll_number: "",
@@ -29,7 +28,22 @@ function AddStudent() {
     emergency_contact: ""
   });
 
-  // Pre-fill form if editing
+  // ── FETCH EXISTING CLASSES FROM DB ────────────────────────────
+  useEffect(() => {
+    const fetchClasses = async () => {
+      try {
+        const res = await fetch("http://127.0.0.1:8000/api/students/");
+        const data = await res.json();
+        const unique = [...new Set(data.map(s => s.class_name).filter(Boolean))].sort();
+        setExistingClasses(unique);
+      } catch (err) {
+        console.error("Failed to fetch classes:", err);
+      }
+    };
+    fetchClasses();
+  }, []);
+
+  // ── PRE-FILL FORM IN EDIT MODE ────────────────────────────────
   useEffect(() => {
     if (isEditMode && existingData) {
       setFormData({
@@ -50,25 +64,33 @@ function AddStudent() {
   }, [isEditMode, existingData]);
 
   const handleChange = (e) => {
-    setFormData({
-      ...formData,
-      [e.target.name]: e.target.value,
-    });
+    setFormData({ ...formData, [e.target.name]: e.target.value });
+  };
+
+  // ── CLASS DROPDOWN HANDLER ────────────────────────────────────
+  const handleClassSelect = (e) => {
+    const val = e.target.value;
+    if (val === "__new__") {
+      // Teacher wants to type a new class
+      setIsNewClass(true);
+      setFormData({ ...formData, class_name: "" });
+    } else {
+      setIsNewClass(false);
+      setFormData({ ...formData, class_name: val });
+    }
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     
-    // Determine if we are creating new or updating existing
     const url = isEditMode
       ? `http://127.0.0.1:8000/api/students/${existingData.id}/`
       : "http://127.0.0.1:8000/api/students/";
-      
     const method = isEditMode ? "PUT" : "POST";
 
     try {
       const res = await fetch(url, {
-        method: method,
+        method,
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(formData),
       });
@@ -98,13 +120,13 @@ function AddStudent() {
         </div>
         <nav className="sidebar-nav">
           <a href="#" className="nav-item active" onClick={() => navigate("/studentDB")}><span className="nav-icon">▦</span> Dashboard</a>
-          <a href="#" className="nav-item "><span className="nav-icon">👥</span> Students</a>
-          <a href="#" className="nav-item"><span className="nav-icon">📘</span> Attendence</a>
+          <a href="#" className="nav-item"><span className="nav-icon">👥</span> Students</a>
+          <a href="#" className="nav-item"><span className="nav-icon">📘</span> Attendance</a>
           <a href="#" className="nav-item"><span className="nav-icon">📊</span> Reports</a>
         </nav>
       </aside>
 
-      {/* MAIN CONTENT AREA */}
+      {/* MAIN CONTENT */}
       <main className="main-content">
         <header className="top-navbar">
           <div className="search-container">
@@ -131,7 +153,7 @@ function AddStudent() {
 
           <form className="registration-form-card" onSubmit={handleSubmit}>
             
-            {/* PHOTO UPLOAD UI */}
+            {/* PHOTO UPLOAD */}
             <div className="photo-upload-section">
               <div className="photo-placeholder">
                 <span className="camera-icon">📷</span>
@@ -146,7 +168,6 @@ function AddStudent() {
 
             <div className="section-divider">PERSONAL INFORMATION</div>
             
-            {/* FULL NAME AND ROLL NUMBER SIDE-BY-SIDE */}
             <div className="form-grid-2">
               <div className="input-group">
                 <label>Full Name (as per official records)</label>
@@ -177,7 +198,7 @@ function AddStudent() {
             <div className="form-grid-2">
               <div className="input-group">
                 <label>Nationality</label>
-                <input type="text" name="nationality" placeholder="e.g. Canadian" value={formData.nationality} onChange={handleChange} />
+                <input type="text" name="nationality" placeholder="e.g. Indian" value={formData.nationality} onChange={handleChange} />
               </div>
               <div className="input-group">
                 <label>Blood Group</label>
@@ -185,9 +206,51 @@ function AddStudent() {
               </div>
             </div>
 
+            {/* ── ASSIGNED CLASS — DROPDOWN + NEW CLASS OPTION ── */}
             <div className="input-group" style={{ marginTop: '20px' }}>
               <label>Assigned Class</label>
-              <input type="text" name="class_name" placeholder="e.g. Grade 10 - Section A" value={formData.class_name} onChange={handleChange} required />
+
+              {/* Always show the dropdown */}
+              <select
+                onChange={handleClassSelect}
+                value={isNewClass ? "__new__" : formData.class_name}
+                required={!isNewClass}
+                style={{ marginBottom: isNewClass ? 10 : 0 }}
+              >
+                <option value="">Select a class</option>
+                {existingClasses.map(c => (
+                  <option key={c} value={c}>{c}</option>
+                ))}
+                <option value="__new__">➕ Add New Class</option>
+              </select>
+
+              {/* Only show text input when "Add New Class" is selected */}
+              {isNewClass && (
+                <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+                  <input
+                    type="text"
+                    name="class_name"
+                    placeholder="e.g. Grade 10 - Section A"
+                    value={formData.class_name}
+                    onChange={handleChange}
+                    required
+                    autoFocus
+                    style={{ flex: 1 }}
+                  />
+                  {/* Back to dropdown */}
+                  <button
+                    type="button"
+                    onClick={() => { setIsNewClass(false); setFormData({ ...formData, class_name: "" }); }}
+                    style={{
+                      padding: '8px 12px', background: '#f1f5f9',
+                      border: '1px solid #e2e8f0', borderRadius: 8,
+                      fontSize: 12, color: '#64748b', cursor: 'pointer', whiteSpace: 'nowrap'
+                    }}
+                  >
+                    ← Back
+                  </button>
+                </div>
+              )}
             </div>
 
             <div className="section-divider">PARENT / GUARDIAN DETAILS</div>
@@ -221,7 +284,6 @@ function AddStudent() {
               </div>
             </div>
 
-            {/* FORM ACTIONS */}
             <div className="form-actions-row">
               <button type="button" className="cancel-btn" onClick={() => setConfirmCancel(true)}>Cancel</button>
               <button type="submit" className="save-btn">{isEditMode ? "Update Student" : "Register Student"}</button>
@@ -229,7 +291,6 @@ function AddStudent() {
 
           </form>
 
-          {/* YOUR CUSTOM CANCEL CONFIRMATION MODAL */}
           {confirmCancel && (
             <div className='confirm-cancel-form'>
               <div className='confirm-cancel-content'>
