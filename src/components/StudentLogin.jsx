@@ -2,29 +2,43 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import './Login.css';
 
-function Login() {
+function StudentLogin() {
   const navigate = useNavigate();
-  const [username, setUsername] = useState('');
-  const [password, setPassword] = useState('');
+  const [rollNumber, setRollNumber] = useState('');
+  const [dob, setDob] = useState('');
   const [error, setError] = useState('');
+  const [loading, setLoading] = useState(false);
 
-  const handleSignIn = (e) => {
+  const handleSignIn = async (e) => {
     e.preventDefault();
     setError('');
+    setLoading(true);
 
-    // ── Temporary hardcoded teacher auth ──────────────────────────
-    // Replace this with a real Django JWT call later
-    if (username === 'teacher' && password === 'admin123') {
-      localStorage.setItem('teacherUser', JSON.stringify({ username, role: 'teacher' }));
-      navigate('/studentDB');
-    } else {
-      setError('Invalid credentials. Please try again.');
+    try {
+      const res = await fetch('http://127.0.0.1:8000/api/student-login/', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ roll_number: rollNumber, dob: dob }),
+      });
+
+      const data = await res.json();
+
+      if (res.ok) {
+        localStorage.setItem('studentUser', JSON.stringify(data));
+        navigate(`/student-dashboard/${data.id}`);
+      } else {
+        setError(data.error || 'Login failed.');
+      }
+    } catch (err) {
+      setError('Server error. Please try again.');
+      console.error('Login error:', err);
+    } finally {
+      setLoading(false);
     }
   };
 
   return (
     <div className="login-page-wrapper">
-
       <div className="login-bokeh login-bokeh-1"></div>
       <div className="login-bokeh login-bokeh-2"></div>
       <div className="login-bokeh login-bokeh-3"></div>
@@ -36,26 +50,25 @@ function Login() {
           </svg>
         </div>
 
-        <h2 className="login-title">Welcome Back</h2>
+        <h2 className="login-title">Student Portal</h2>
         <p className="login-subtitle">
-          Please enter your credentials to continue as <span className="login-role-text">Faculty</span>
+          Enter your <span className="login-role-text">Roll Number</span> and <span className="login-role-text">Date of Birth</span>
         </p>
 
         <form className="login-form" onSubmit={handleSignIn}>
           <input
             type="text"
             className="login-input"
-            placeholder="Username"
-            value={username}
-            onChange={(e) => setUsername(e.target.value)}
+            placeholder="Roll Number (e.g. 563)"
+            value={rollNumber}
+            onChange={(e) => setRollNumber(e.target.value)}
             required
           />
           <input
-            type="password"
+            type="date"
             className="login-input"
-            placeholder="Password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
+            value={dob}
+            onChange={(e) => setDob(e.target.value)}
             required
           />
 
@@ -65,11 +78,9 @@ function Login() {
             </p>
           )}
 
-          <div className="login-forgot-container">
-            <a href="#" className="login-forgot-link">Forgot Password?</a>
-          </div>
-
-          <button type="submit" className="login-submit-btn">Sign In</button>
+          <button type="submit" className="login-submit-btn" disabled={loading}>
+            {loading ? 'Verifying...' : 'Sign In'}
+          </button>
         </form>
 
         <button className="login-back-btn" onClick={() => navigate('/')}>
@@ -84,4 +95,4 @@ function Login() {
   );
 }
 
-export default Login;
+export default StudentLogin;

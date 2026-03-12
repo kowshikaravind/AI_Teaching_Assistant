@@ -13,19 +13,37 @@ function AddStudent() {
   const [existingClasses, setExistingClasses] = useState([]);
   const [isNewClass, setIsNewClass] = useState(false); // toggle manual input
 
-  const [formData, setFormData] = useState({
-    name: "",
-    roll_number: "",
-    class_name: "",
-    dob: "",
-    gender: "",
-    nationality: "",
-    blood_group: "",
-    parent_name: "",
-    parent_number: "",
-    parent_email: "",
-    address: "",
-    emergency_contact: ""
+  const [formData, setFormData] = useState(() => {
+    if (isEditMode && existingData) {
+      return {
+        name: existingData.name || "",
+        roll_number: existingData.roll_number || "",
+        class_name: existingData.class_name || "",
+        dob: existingData.dob || "",
+        gender: existingData.gender || "",
+        nationality: existingData.nationality || "",
+        blood_group: existingData.blood_group || "",
+        parent_name: existingData.parent_name || "",
+        parent_number: existingData.parent_number || "",
+        parent_email: existingData.parent_email || "",
+        address: existingData.address || "",
+        emergency_contact: existingData.emergency_contact || ""
+      };
+    }
+    return {
+      name: "",
+      roll_number: "",
+      class_name: "",
+      dob: "",
+      gender: "",
+      nationality: "",
+      blood_group: "",
+      parent_name: "",
+      parent_number: "",
+      parent_email: "",
+      address: "",
+      emergency_contact: ""
+    };
   });
 
   // ── FETCH EXISTING CLASSES FROM DB ────────────────────────────
@@ -42,26 +60,6 @@ function AddStudent() {
     };
     fetchClasses();
   }, []);
-
-  // ── PRE-FILL FORM IN EDIT MODE ────────────────────────────────
-  useEffect(() => {
-    if (isEditMode && existingData) {
-      setFormData({
-        name: existingData.name || "",
-        roll_number: existingData.roll_number || "",
-        class_name: existingData.class_name || "",
-        dob: existingData.dob || "",
-        gender: existingData.gender || "",
-        nationality: existingData.nationality || "",
-        blood_group: existingData.blood_group || "",
-        parent_name: existingData.parent_name || "",
-        parent_number: existingData.parent_number || "",
-        parent_email: existingData.parent_email || "",
-        address: existingData.address || "",
-        emergency_contact: existingData.emergency_contact || ""
-      });
-    }
-  }, [isEditMode, existingData]);
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -230,7 +228,7 @@ function AddStudent() {
                   <input
                     type="text"
                     name="class_name"
-                    placeholder="e.g. Grade 10 - Section A"
+                    placeholder="DEPARTMENT - YEAR (e.g. Computer Science - 2025)"
                     value={formData.class_name}
                     onChange={handleChange}
                     required

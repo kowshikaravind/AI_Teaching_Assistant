@@ -12,14 +12,17 @@ import Login from './components/Login.jsx';
 import AttendanceSheet from './pages/AttendanceSheet.jsx';
 import AIInsights from './pages/AIinsights.jsx';
 import StudentMain from './Student/StudentMain.jsx';
+import StudentLogin from './components/StudentLogin.jsx';
+import Profile from './Student/Profile.jsx';
 
 createRoot(document.getElementById('root')).render(
     <BrowserRouter>
         <Routes>
             <Route path="/" element={<LoginType />} />
             <Route path="/login" element={<Login />} />
+            <Route path="/student-login" element={<StudentLogin />} />
 
-            <Route path="/student-dashboard" element={<StudentMain />} />
+            <Route path="/student-dashboard/:id" element={<StudentMain />} />
 
             <Route path="/studentDB" element={<App />} />
             <Route path="/add-student" element={<AddStudent />} />
@@ -30,7 +33,9 @@ createRoot(document.getElementById('root')).render(
             <Route path="/add-test-mark/:id" element={<AddTestMark />} />
             <Route path="/attendance" element={<AttendanceSheet />} />
             <Route path="/ai-insights" element={<AIInsights />} />
+            <Route path="/profile" element={<Profile />} />
             <Route path="*" element={<Navigate to="/" replace />} />
+
         </Routes>
     </BrowserRouter>
 )
