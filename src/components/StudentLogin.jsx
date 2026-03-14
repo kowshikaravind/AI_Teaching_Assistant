@@ -4,8 +4,8 @@ import './Login.css';
 
 function StudentLogin() {
   const navigate = useNavigate();
-  const [rollNumber, setRollNumber] = useState('');
-  const [dob, setDob] = useState('');
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
 
@@ -18,7 +18,7 @@ function StudentLogin() {
       const res = await fetch('http://127.0.0.1:8000/api/student-login/', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ roll_number: rollNumber, dob: dob }),
+        body: JSON.stringify({ email, password }),
       });
 
       const data = await res.json();
@@ -52,23 +52,24 @@ function StudentLogin() {
 
         <h2 className="login-title">Student Portal</h2>
         <p className="login-subtitle">
-          Enter your <span className="login-role-text">Roll Number</span> and <span className="login-role-text">Date of Birth</span>
+          Enter your <span className="login-role-text">Email</span> and <span className="login-role-text">Password</span>
         </p>
 
         <form className="login-form" onSubmit={handleSignIn}>
           <input
-            type="text"
+            type="email"
             className="login-input"
-            placeholder="Roll Number (e.g. 563)"
-            value={rollNumber}
-            onChange={(e) => setRollNumber(e.target.value)}
+            placeholder="Student Email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
             required
           />
           <input
-            type="date"
+            type="password"
             className="login-input"
-            value={dob}
-            onChange={(e) => setDob(e.target.value)}
+            placeholder="Password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
             required
           />
 

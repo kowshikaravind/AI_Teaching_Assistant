@@ -18,7 +18,10 @@ function App() {
   }, []);
   
   useEffect(() => {
-    fetchStudents();
+    const initFetch = async () => {
+      await fetchStudents();
+    }
+    initFetch();
   }, [fetchStudents]);
 
   // --- CALCULATE NEW DASHBOARD STATS ---
@@ -91,7 +94,9 @@ function App() {
           <div className="nav-item active" style={{ cursor: 'pointer' }}><span className="nav-icon">▦</span> Dashboard</div>
           <div className="nav-item" onClick={() => navigate("/student-analysis")} style={{ cursor: 'pointer' }}><span className="nav-icon">👥</span> Students</div>
           <div className="nav-item" onClick={() => navigate("/attendance")} style={{ cursor: 'pointer' }}><span className="nav-icon">📋</span> Attendance</div>
+          <div className="nav-item" onClick={() => navigate("/upcomming-test")} style={{ cursor: 'pointer' }}><span className="nav-icon">📝</span> Upcoming Tests</div>
           <div className="nav-item" onClick={() => navigate("/ai-insights")} style={{ cursor: 'pointer' }}><span className="nav-icon">✨</span> AI Insights</div>
+          <div className="nav-item" onClick={() => navigate("/teacher-notifications")} style={{ cursor: 'pointer' }}><span className="nav-icon">🔔</span> Alerts</div>
         </nav>
         
         <div className="sidebar-bottom">

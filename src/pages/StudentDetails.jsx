@@ -42,7 +42,7 @@ function StudentDetails() {
   const chatBottomRef = useRef(null);
 
   // ── Fetch student ──────────────────────────────────────────────
-  const fetchStudent = async () => {
+  const fetchStudent = React.useCallback(async () => {
     try {
       const res = await fetch(`http://127.0.0.1:8000/api/students/${id}/`);
       if (res.ok) {
@@ -68,9 +68,9 @@ function StudentDetails() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [id]);
 
-  useEffect(() => { fetchStudent(); }, [id]);
+  useEffect(() => { fetchStudent(); }, [id, fetchStudent]);
 
   // Auto-scroll chat to bottom when new messages arrive
   useEffect(() => {
@@ -136,6 +136,37 @@ function StudentDetails() {
     const avg = (marks.reduce((a, b) => a + b, 0) / marks.length).toFixed(0);
     const growth = marks.length > 1 ? marks[marks.length - 1] - marks[0] : 0;
     return { avg, growth };
+  }, [examHistory]);
+
+  const examHistoryBySubject = useMemo(() => {
+    const normalize = (value) => String(value || '').trim().toLowerCase().replace(/\s+/g, ' ');
+    const toLabel = (value) => {
+      const clean = String(value || '').trim().replace(/\s+/g, ' ');
+      if (!clean) return 'General';
+      return clean
+        .split(' ')
+        .map((part) => part.charAt(0).toUpperCase() + part.slice(1).toLowerCase())
+        .join(' ');
+    };
+
+    const grouped = {};
+    examHistory.forEach((exam) => {
+      const key = normalize(exam.subject);
+      if (!grouped[key]) {
+        grouped[key] = {
+          subject: toLabel(exam.subject),
+          rows: [],
+        };
+      }
+      grouped[key].rows.push(exam);
+    });
+
+    return Object.values(grouped)
+      .map((group) => ({
+        ...group,
+        rows: [...group.rows].reverse(),
+      }))
+      .sort((a, b) => a.subject.localeCompare(b.subject));
   }, [examHistory]);
 
   const chartData = {
@@ -402,28 +433,37 @@ function StudentDetails() {
             {examHistory.length === 0 ? (
               <tr><td colSpan="6" className="empty-table-msg">No exam records found.</td></tr>
             ) : (
-              [...examHistory].reverse().map(exam => (
-                <tr key={exam.id}>
-                  <td className="fw-bold">{exam.subject}</td>
-                  <td>{exam.test}</td>
-                  <td className="text-muted">{exam.date}</td>
-                  <td>
-                    <span className="score-text">
-                      <b>{exam.rawObtained}/{exam.rawTotal}</b>
-                      <small> ({exam.mark}%)</small>
-                    </span>
-                  </td>
-                  <td>
-                    <span className={`status-badge ${exam.mark >= 50 ? 'pass' : 'fail'}`}>
-                      {exam.mark >= 50 ? 'PASSED' : 'FAILED'}
-                    </span>
-                  </td>
-                  <td style={{ textAlign: "right" }}>
-                    <button className="icon-btn-delete" onClick={() => handleDeleteMark(exam.id)}>
-                      🗑️
-                    </button>
-                  </td>
-                </tr>
+              examHistoryBySubject.map((group) => (
+                <React.Fragment key={group.subject}>
+                  <tr>
+                    <td colSpan="6" style={{ background: '#f8fafc', color: '#334155', fontWeight: 700, fontSize: 13 }}>
+                      {group.subject}
+                    </td>
+                  </tr>
+                  {group.rows.map((exam) => (
+                    <tr key={exam.id}>
+                      <td className="fw-bold">{group.subject}</td>
+                      <td>{exam.test}</td>
+                      <td className="text-muted">{exam.date}</td>
+                      <td>
+                        <span className="score-text">
+                          <b>{exam.rawObtained}/{exam.rawTotal}</b>
+                          <small> ({exam.mark}%)</small>
+                        </span>
+                      </td>
+                      <td>
+                        <span className={`status-badge ${exam.mark >= 50 ? 'pass' : 'fail'}`}>
+                          {exam.mark >= 50 ? 'PASSED' : 'FAILED'}
+                        </span>
+                      </td>
+                      <td style={{ textAlign: "right" }}>
+                        <button className="icon-btn-delete" onClick={() => handleDeleteMark(exam.id)}>
+                          🗑️
+                        </button>
+                      </td>
+                    </tr>
+                  ))}
+                </React.Fragment>
               ))
             )}
           </tbody>

@@ -31,7 +31,11 @@ function StudentMain() {
     };
     
     window.addEventListener('storage', handleStorageChange);
-    return () => window.removeEventListener('storage', handleStorageChange);
+    window.addEventListener('app-settings-changed', handleStorageChange);
+    return () => {
+      window.removeEventListener('storage', handleStorageChange);
+      window.removeEventListener('app-settings-changed', handleStorageChange);
+    };
   }, []);
 
   // ── FETCH STUDENT DATA ────────────────────────────────────────
@@ -53,7 +57,7 @@ function StudentMain() {
       }
     };
     fetchAll();
-  }, []);
+  }, [STUDENT_ID]);
 
   // ── OVERALL AVERAGE ───────────────────────────────────────────
   const overallAvg = useMemo(() => {
@@ -166,10 +170,46 @@ function StudentMain() {
         </div>
         <nav className="sd-nav">
           <a href="#" className="sd-nav-item active"><span className="icon">⊞</span> Dashboard</a>
-          <a href="#" className="sd-nav-item"><span className="icon">📈</span> My Performance</a>
-          <a href="#" className="sd-nav-item"><span className="icon">📅</span> Upcoming Tests</a>
-          <a href="#" className="sd-nav-item"><span className="icon">🤖</span> AI Tutor</a>
-          <a href="#" className="sd-nav-item"><span className="icon">🔔</span> Notifications</a>
+          <a
+            href="#"
+            className="sd-nav-item"
+            onClick={(e) => {
+              e.preventDefault();
+              navigate('/my-performance');
+            }}
+          >
+            <span className="icon">📈</span> My Performance
+          </a>
+          <a
+            href="#"
+            className="sd-nav-item"
+            onClick={(e) => {
+              e.preventDefault();
+              navigate('/upcoming-tests');
+            }}
+          >
+            <span className="icon">📅</span> Upcoming Tests
+          </a>
+          <a
+            href="#"
+            className="sd-nav-item"
+            onClick={(e) => {
+              e.preventDefault();
+              navigate('/ai-tutor');
+            }}
+          >
+            <span className="icon">🤖</span> AI Tutor
+          </a>
+          <a
+            href="#"
+            className="sd-nav-item"
+            onClick={(e) => {
+              e.preventDefault();
+              navigate('/notifications');
+            }}
+          >
+            <span className="icon">🔔</span> Notifications
+          </a>
           <a
             href="#"
             className={`sd-nav-item ${showSettings ? 'active' : ''}`}

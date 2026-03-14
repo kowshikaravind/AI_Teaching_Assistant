@@ -18,6 +18,9 @@ function AddStudent() {
       return {
         name: existingData.name || "",
         roll_number: existingData.roll_number || "",
+        student_number: existingData.student_number || "",
+        student_email: existingData.student_email || "",
+        student_password: "",
         class_name: existingData.class_name || "",
         dob: existingData.dob || "",
         gender: existingData.gender || "",
@@ -33,6 +36,9 @@ function AddStudent() {
     return {
       name: "",
       roll_number: "",
+      student_number: "",
+      student_email: "",
+      student_password: "student-123",
       class_name: "",
       dob: "",
       gender: "",
@@ -175,6 +181,31 @@ function AddStudent() {
                 <label>Roll Number</label>
                 <input type="text" name="roll_number" placeholder="e.g. 1024" value={formData.roll_number} onChange={handleChange} required />
               </div>
+            </div>
+
+            <div className="form-grid-2" style={{ marginTop: '20px' }}>
+              <div className="input-group">
+                <label>Student Number</label>
+                <input type="text" name="student_number" placeholder="e.g. STU-2026-001" value={formData.student_number} onChange={handleChange} required />
+              </div>
+              <div className="input-group">
+                <label>Student Email</label>
+                <input type="email" name="student_email" placeholder="student@example.com" value={formData.student_email} onChange={handleChange} required />
+              </div>
+            </div>
+
+            <div className="input-group" style={{ marginTop: '20px' }}>
+              <label>Student Password</label>
+              <input
+                type="text"
+                name="student_password"
+                placeholder="Default: student-123"
+                value={formData.student_password}
+                onChange={handleChange}
+              />
+              <small style={{ color: '#64748b' }}>
+                {isEditMode ? 'Leave blank to keep current password.' : 'Default password is student-123 if unchanged.'}
+              </small>
             </div>
 
             <div className="form-grid-2">

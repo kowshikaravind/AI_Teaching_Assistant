@@ -1,3 +1,5 @@
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=Crimson+Pro:ital,wght@0,300;0,400;1,300&display=swap');
+
 /*--------------------Login Type------------------------*/
 .login-type-container{
   height: 100vh;
@@ -223,8 +225,6 @@ h2{
   text-align: center;
   width: 100%;
 }
-
-@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=Crimson+Pro:ital,wght@0,300;0,400;1,300&display=swap');
 
 *{ margin: 0; padding: 0; box-sizing: border-box; }
 

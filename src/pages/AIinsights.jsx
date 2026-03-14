@@ -101,7 +101,9 @@ export default function AIinsights() {
           <div className="nav-item" onClick={() => navigate("/studentDB")} style={{ cursor: 'pointer' }}><span className="nav-icon">▦</span> Dashboard</div>
           <div className="nav-item" onClick={() => navigate("/student-analysis")} style={{ cursor: 'pointer' }}><span className="nav-icon">👥</span> Students</div>
           <div className="nav-item" onClick={() => navigate("/attendance")} style={{ cursor: 'pointer' }}><span className="nav-icon">📋</span> Attendance</div>
+          <div className="nav-item" onClick={() => navigate("/upcomming-test")} style={{ cursor: 'pointer' }}><span className="nav-icon">📝</span> Upcoming Tests</div>
           <div className="nav-item active" style={{ cursor: 'pointer' }}><span className="nav-icon">✨</span> AI Insights</div>
+          <div className="nav-item" onClick={() => navigate("/teacher/alerts")} style={{ cursor: 'pointer' }}><span className="nav-icon">🔔</span> Alerts</div>
         </nav>
         <div className="sidebar-bottom">
           <div className="nav-item" style={{ cursor: 'pointer' }}><span className="nav-icon">⚙️</span> Settings</div>

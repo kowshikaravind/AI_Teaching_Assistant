@@ -31,7 +31,12 @@ function StudentAnalysis() {
     }
   }, []);
 
-  useEffect(() => { fetchData(); }, [fetchData]);
+  useEffect(() => {
+    const initFetch = async () => {
+      await fetchData();
+    }
+    initFetch();
+  }, [fetchData]);
 
   // ── FETCH SUBJECTS FROM DB ────────────────────────────────────
   const fetchSubjects = useCallback(async () => {
@@ -44,7 +49,12 @@ function StudentAnalysis() {
     }
   }, []);
 
-  useEffect(() => { fetchSubjects(); }, [fetchSubjects]);
+  useEffect(() => { 
+    const initFetch = async () => {
+      await fetchSubjects();
+    }
+    initFetch();
+  }, [fetchSubjects]);
 
   // ── ADD SUBJECT TO DB ─────────────────────────────────────────
   const handleAddSubject = async () => {
@@ -65,6 +75,7 @@ function StudentAnalysis() {
         setSubjectError("Subject already exists.");
       }
     } catch (err) {
+      console.error("Failed to add subject:", err);
       setSubjectError("Failed to add subject.");
     }
   };
@@ -144,8 +155,14 @@ function StudentAnalysis() {
           <div className="nav-item" onClick={() => navigate("/attendance")} style={{ cursor: 'pointer' }}>
             <span className="nav-icon">📋</span> Attendance
           </div>
+          <div className="nav-item" onClick={() => navigate("/upcomming-test")} style={{ cursor: 'pointer' }}>
+            <span className="nav-icon">📝</span> Upcoming Tests
+          </div>
           <div className="nav-item" onClick={() => navigate("/ai-insights")} style={{ cursor: 'pointer' }}>
             <span className="nav-icon">✨</span> AI Insights
+          </div>
+          <div className="nav-item" onClick={() => navigate("/teacher/alerts")} style={{ cursor: 'pointer' }}>
+            <span className="nav-icon">🔔</span> Alerts
           </div>
         </nav>
         <div className="sidebar-bottom">
