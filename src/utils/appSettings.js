@@ -2,7 +2,7 @@ const DEFAULT_SETTINGS = {
   themeMode: 'dark',
   fontSize: 'Medium',
 };
-
+ 
 const FONT_SCALE_MAP = {
   Small: 0.9,
   Medium: 1,

@@ -1,9 +1,11 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import '../App.css';
+import { getTeacherSessionProfile } from '../utils/teacherSession.js';
 
 function TeacherNotify() {
   const navigate = useNavigate();
+  const { teacherName, department, avatar } = getTeacherSessionProfile();
   const [alerts, setAlerts] = useState([]);
   const [tests, setTests] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -73,7 +75,16 @@ function TeacherNotify() {
             <span className="search-icon">🔔</span>
             <input type="text" value="AI escalation alerts: continued decline after student warning" readOnly className="search-input" />
           </div>
-          <button className="btn-primary" onClick={() => navigate('/studentDB')}>Back to Dashboard</button>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+            <button className="btn-primary" onClick={() => navigate('/studentDB')}>Back to Dashboard</button>
+            <div className="user-profile-section">
+              <div className="user-info">
+                <span className="user-name">{teacherName}</span>
+                <span className="user-role">{department}</span>
+              </div>
+              <img src={avatar} alt="Teacher" className="user-avatar" />
+            </div>
+          </div>
         </header>
 
         <div className="dashboard-body">

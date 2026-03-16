@@ -1,9 +1,11 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import '../App.css';
+import { getTeacherSessionProfile } from '../utils/teacherSession.js';
 
 function AttendanceSheet() {
   const navigate = useNavigate();
+  const { teacherName, department, avatar } = getTeacherSessionProfile();
   const [students, setStudents] = useState([]);
   const [attendanceState, setAttendanceState] = useState({});
   const [searchQuery, setSearchQuery] = useState("");
@@ -214,7 +216,13 @@ function AttendanceSheet() {
               Auto-saving
             </div>
 
-            <img src="https://i.pravatar.cc/150?img=47" alt="Profile" className="user-avatar" />
+            <div className="user-profile-section" style={{ marginLeft: 4 }}>
+              <div className="user-info">
+                <span className="user-name">{teacherName}</span>
+                <span className="user-role">{department}</span>
+              </div>
+              <img src={avatar} alt="Teacher" className="user-avatar" />
+            </div>
           </div>
         </header>
 

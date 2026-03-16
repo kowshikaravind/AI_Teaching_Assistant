@@ -8,9 +8,27 @@ function Test() {
   const [tests, setTests] = useState([]);
   const [loading, setLoading] = useState(true);
   const [showSettings, setShowSettings] = useState(false);
+  const [activeTestTab, setActiveTestTab] = useState('scheduled');
+  const [lightMode, setLightMode] = useState(false);
 
   const studentUser = JSON.parse(localStorage.getItem('studentUser') || '{}');
   const studentId = studentUser?.id;
+
+  useEffect(() => {
+    const updateTheme = () => {
+      const saved = localStorage.getItem('themeMode');
+      setLightMode(saved === 'light');
+    };
+
+    updateTheme();
+
+    window.addEventListener('storage', updateTheme);
+    window.addEventListener('app-settings-changed', updateTheme);
+    return () => {
+      window.removeEventListener('storage', updateTheme);
+      window.removeEventListener('app-settings-changed', updateTheme);
+    };
+  }, []);
 
   useEffect(() => {
     if (!studentId) {
@@ -40,8 +58,40 @@ function Test() {
     fetchAll();
   }, [studentId, navigate]);
 
+  const scheduledTests = useMemo(
+    () => tests.filter((t) => t.status !== 'finished').sort((a, b) => new Date(a.test_date) - new Date(b.test_date)),
+    [tests]
+  );
+
+  const finishedTests = useMemo(
+    () => tests.filter((t) => t.status === 'finished').sort((a, b) => new Date(b.test_date) - new Date(a.test_date)),
+    [tests]
+  );
+
+  const normalize = (text) => String(text || '').trim().toLowerCase();
+
+  const getStudentMarkForTest = (test) => {
+    const marks = Array.isArray(student?.test_marks) ? student.test_marks : [];
+    const testSubject = normalize(test.subject || test.topic);
+
+    const exact = marks.find(
+      (m) =>
+        normalize(m.test_name) === normalize(test.test_name)
+        && normalize(m.subject) === testSubject
+        && String(m.date_taken) === String(test.test_date)
+    );
+
+    if (exact) return exact;
+
+    return marks.find(
+      (m) =>
+        normalize(m.test_name) === normalize(test.test_name)
+        && normalize(m.subject) === testSubject
+    );
+  };
+
   const aiSuggestions = useMemo(() => {
-    if (!tests.length) {
+    if (!scheduledTests.length) {
       return [
         'No upcoming tests are scheduled yet. Keep a daily 45-minute study routine so you stay prepared.',
         'Revise one core subject every day and solve at least 5 practice questions.',
@@ -49,7 +99,7 @@ function Test() {
       ];
     }
 
-    const nextTest = [...tests].sort((a, b) => new Date(a.test_date) - new Date(b.test_date))[0];
+    const nextTest = scheduledTests[0];
     const daysLeft = Math.max(0, Math.ceil((new Date(nextTest.test_date) - new Date()) / (1000 * 60 * 60 * 24)));
 
     const hasPreviousTests = Array.isArray(student?.test_marks) && student.test_marks.length > 0;
@@ -61,7 +111,6 @@ function Test() {
       ];
     }
 
-    const normalize = (text) => String(text || '').trim().toLowerCase();
     const topicLabel = nextTest.subject || nextTest.topic;
     const topicKey = normalize(topicLabel);
 
@@ -91,12 +140,12 @@ function Test() {
       `Latest related score is ${latest.pct}%. In the next ${daysLeft} day(s), review mistakes first, then do one timed practice set daily.`,
       `Keep revision topic-specific: "${topicLabel}" concepts, key formulas, and 10-15 targeted questions per session.`,
     ];
-  }, [student, tests]);
+  }, [student, scheduledTests]);
 
   if (loading) return <div className="st-loading">Loading upcoming tests...</div>;
 
   return (
-    <div className="st-layout">
+    <div className={`st-layout ${lightMode ? 'sd-layout-light st-layout-light' : ''}`}>
       <aside className="sd-sidebar">
         <div className="sd-user-profile">
           <div className="sd-avatar-container">
@@ -136,25 +185,100 @@ function Test() {
         </div>
 
         <div className="st-grid">
-          <section className="st-card">
-            <h3>Scheduled For {student?.class_name}</h3>
-            {tests.length === 0 ? (
-              <p className="st-empty">No upcoming tests scheduled yet.</p>
-            ) : (
-              <div className="st-list">
-                {tests.map((t) => (
-                  <div className="st-item" key={t.id}>
-                    <div>
-                      <h4>{t.test_name}</h4>
-                      <p>Subject: {t.subject || t.topic}</p>
-                    </div>
-                    <div className="st-meta">
-                      <span>{t.test_date}</span>
-                      <strong>{t.total_marks} marks</strong>
-                    </div>
+          <section className="st-card st-tests-card">
+            <div className="st-tab-switcher">
+              <button
+                type="button"
+                onClick={() => setActiveTestTab('scheduled')}
+                className={`st-tab-btn ${activeTestTab === 'scheduled' ? 'active' : ''}`}
+              >
+                Scheduled Test
+              </button>
+              <button
+                type="button"
+                onClick={() => setActiveTestTab('past')}
+                className={`st-tab-btn ${activeTestTab === 'past' ? 'active' : ''}`}
+              >
+                Past Test
+              </button>
+            </div>
+
+            {activeTestTab === 'scheduled' ? (
+              <>
+                <h3>Scheduled For {student?.class_name}</h3>
+                {scheduledTests.length === 0 ? (
+                  <p className="st-empty">No upcoming tests scheduled yet.</p>
+                ) : (
+                  <div className="st-list">
+                    {scheduledTests.map((t) => (
+                      <div className="st-item" key={t.id}>
+                        <div>
+                          <h4>{t.test_name}</h4>
+                          <p>Subject: {t.subject || t.topic}</p>
+                        </div>
+                        <div className="st-meta">
+                          <span>{t.test_date}</span>
+                          <strong>{t.total_marks} marks</strong>
+                        </div>
+                      </div>
+                    ))}
                   </div>
-                ))}
-              </div>
+                )}
+              </>
+            ) : (
+              <>
+                <h3>Past Tests (Finished)</h3>
+                {finishedTests.length === 0 ? (
+                  <p className="st-empty">No finished tests yet.</p>
+                ) : (
+                  <div className="st-past-track">
+                    {finishedTests.map((t) => {
+                      const mark = getStudentMarkForTest(t);
+                      const pct = mark && Number(mark.total_marks) > 0
+                        ? Math.round((Number(mark.marks_obtained) / Number(mark.total_marks)) * 100)
+                        : null;
+
+                      return (
+                        <div key={`finished-${t.id}`} className="st-past-card">
+                          <div className="st-past-head">
+                            <h4>{t.test_name}</h4>
+                            <span
+                              className="st-finished-badge"
+                            >
+                              Finished
+                            </span>
+                          </div>
+
+                          <p className="st-past-subject">
+                            Subject: {t.subject || t.topic}
+                          </p>
+                          <p className="st-past-date">
+                            Date: {t.test_date}
+                          </p>
+
+                          {mark ? (
+                            <div className="st-mark-panel">
+                              <div>
+                                <p className="st-mark-label">Your Marks</p>
+                                <strong className="st-mark-value">
+                                  {mark.marks_obtained}/{mark.total_marks}
+                                </strong>
+                              </div>
+                              <strong className="st-mark-pct">
+                                {pct}%
+                              </strong>
+                            </div>
+                          ) : (
+                            <p className="st-mark-pending">
+                              Marks not published yet.
+                            </p>
+                          )}
+                        </div>
+                      );
+                    })}
+                  </div>
+                )}
+              </>
             )}
           </section>
 

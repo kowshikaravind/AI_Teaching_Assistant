@@ -55,6 +55,10 @@ function LoginType() {
         <div className="lt-glow" />
         <div className="lt-rule" />
 
+        <button className="lt-admin-btn" onClick={() => navigate('/admin-login')}>
+          Admin Login
+        </button>
+
         <div className="lt-wrapper">
 
           {/* Seal */}
@@ -116,7 +120,7 @@ function LoginType() {
           {/* Footer link */}
           <p className="lt-footer-link">
             New to the system?{' '}
-            <button onClick={() => navigate('/create-account')}>Create an account</button>
+            <button onClick={() => navigate('/teacher-register')}>Create Teacher Account</button>
           </p>
 
         </div>

@@ -14,13 +14,18 @@ import AIInsights from './pages/AIinsights.jsx';
 import TeacherNotify from './pages/TeacherNotify.jsx';
 import StudentMain from './Student/StudentMain.jsx';
 import StudentLogin from './components/StudentLogin.jsx';
+import AdminLogin from './components/AdminLogin.jsx';
+import TeacherRegister from './components/TeacherRegister.jsx';
 import Profile from './Student/Profile.jsx';
 import Performance from './Student/Performance.jsx';
 import AItutor from './Student/AItutor.jsx';
 import Notification from './Student/Notification.jsx';
 import Test from './Student/Test.jsx';
 import UpcommingTest from './pages/UpcommingTest.jsx';
+import BulkMarkEntry from './pages/BulkMarkEntry.jsx';
+import AdminDashboard from './pages/AdminDashboard.jsx';
 import { applyAppSettings, loadAppSettings } from './utils/appSettings.js';
+import { RequireTeacherAuth, RequireAdminAuth } from './components/RouteGuards.jsx';
 
 applyAppSettings(loadAppSettings());
 
@@ -30,21 +35,25 @@ createRoot(document.getElementById('root')).render(
             <Route path="/" element={<LoginType />} />
             <Route path="/login" element={<Login />} />
             <Route path="/student-login" element={<StudentLogin />} />
+            <Route path="/admin-login" element={<AdminLogin />} />
+            <Route path="/teacher-register" element={<TeacherRegister />} />
+            <Route path="/admin-dashboard" element={<RequireAdminAuth><AdminDashboard /></RequireAdminAuth>} />
 
             <Route path="/student-dashboard/:id" element={<StudentMain />} />
 
-            <Route path="/studentDB" element={<App />} />
-            <Route path="/add-student" element={<AddStudent />} />
-            <Route path="/student-analysis" element={<StudentAnalysis />} />
-            <Route path="/student-analysis/:className" element={<StudentAnalysis />} />
-            <Route path="/student-details/:id/:className" element={<StudentDetails />} />
-            <Route path="/student-details/:id" element={<StudentDetails />} />
-            <Route path="/add-test-mark/:id" element={<AddTestMark />} />
-            <Route path="/attendance" element={<AttendanceSheet />} />
-            <Route path="/upcomming-test" element={<UpcommingTest />} />
-            <Route path="/ai-insights" element={<AIInsights />} />
-            <Route path="/teacher-notifications" element={<TeacherNotify />} />
-            <Route path="/teacher/alerts" element={<TeacherNotify />} />
+            <Route path="/studentDB" element={<RequireTeacherAuth><App /></RequireTeacherAuth>} />
+            <Route path="/add-student" element={<RequireTeacherAuth><AddStudent /></RequireTeacherAuth>} />
+            <Route path="/student-analysis" element={<RequireTeacherAuth><StudentAnalysis /></RequireTeacherAuth>} />
+            <Route path="/student-analysis/:className" element={<RequireTeacherAuth><StudentAnalysis /></RequireTeacherAuth>} />
+            <Route path="/student-details/:id/:className" element={<RequireTeacherAuth><StudentDetails /></RequireTeacherAuth>} />
+            <Route path="/student-details/:id" element={<RequireTeacherAuth><StudentDetails /></RequireTeacherAuth>} />
+            <Route path="/add-test-mark/:id" element={<RequireTeacherAuth><AddTestMark /></RequireTeacherAuth>} />
+            <Route path="/attendance" element={<RequireTeacherAuth><AttendanceSheet /></RequireTeacherAuth>} />
+            <Route path="/upcomming-test" element={<RequireTeacherAuth><UpcommingTest /></RequireTeacherAuth>} />
+            <Route path="/bulk-mark-entry/:testId" element={<RequireTeacherAuth><BulkMarkEntry /></RequireTeacherAuth>} />
+            <Route path="/ai-insights" element={<RequireTeacherAuth><AIInsights /></RequireTeacherAuth>} />
+            <Route path="/teacher-notifications" element={<RequireTeacherAuth><TeacherNotify /></RequireTeacherAuth>} />
+            <Route path="/teacher/alerts" element={<RequireTeacherAuth><TeacherNotify /></RequireTeacherAuth>} />
             <Route path="/profile" element={<Profile />} />
             <Route path="/my-performance" element={<Performance />} />
             <Route path="/ai-tutor" element={<AItutor />} />

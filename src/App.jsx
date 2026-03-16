@@ -1,11 +1,13 @@
 import { useState, useEffect, useCallback, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import './App.css';
+import { getTeacherSessionProfile } from './utils/teacherSession.js';
 
 function App() {
   const [students, setStudents] = useState([]);
   const [searchQuery, setSearchQuery] = useState("");
   const navigate = useNavigate();
+  const { teacherName, department, avatar } = getTeacherSessionProfile();
   
   const fetchStudents = useCallback(async () => {
     try {
@@ -121,12 +123,11 @@ function App() {
           </div>
           
           <div className="user-profile-section">
-            <div className="notification-bell">🔔</div>
             <div className="user-info">
-              <span className="user-name">Sarah Jenkins</span>
-              <span className="user-role">Senior Educator</span>
+              <span className="user-name">{teacherName}</span>
+              <span className="user-role">{department}</span>
             </div>
-            <img src="https://i.pravatar.cc/150?img=47" alt="Profile" className="user-avatar" />
+            <img src={avatar} alt="Teacher" className="user-avatar" />
           </div>
         </header>
 

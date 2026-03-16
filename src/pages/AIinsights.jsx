@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import '../App.css';
+import { getTeacherSessionProfile } from '../utils/teacherSession.js';
 
 const SUGGESTED = [
   "Who is struggling the most right now?",
@@ -13,6 +14,7 @@ const SUGGESTED = [
 
 export default function AIinsights() {
   const navigate = useNavigate();
+  const { teacherName, department, avatar } = getTeacherSessionProfile();
   const [students, setStudents] = useState([]);
   const [loadingStudents, setLoadingStudents] = useState(true);
   const [messages, setMessages] = useState([]);
@@ -120,7 +122,13 @@ export default function AIinsights() {
               {loadingStudents ? "Loading student data..." : `${students.length} students loaded · Ask anything about your class`}
             </p>
           </div>
-          <img src="https://i.pravatar.cc/150?img=47" alt="Profile" className="user-avatar" />
+          <div className="user-profile-section">
+            <div className="user-info">
+              <span className="user-name">{teacherName}</span>
+              <span className="user-role">{department}</span>
+            </div>
+            <img src={avatar} alt="Teacher" className="user-avatar" />
+          </div>
         </header>
 
         {/* CHAT AREA */}

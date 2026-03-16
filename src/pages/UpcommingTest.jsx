@@ -1,11 +1,15 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import '../App.css';
+import SubjectSelectorWithManager from '../components/SubjectSelectorWithManager.jsx';
+import { getTeacherSessionProfile } from '../utils/teacherSession.js';
 
 function UpcommingTest() {
   const navigate = useNavigate();
+  const { teacherName, department, avatar } = getTeacherSessionProfile();
   const [students, setStudents] = useState([]);
   const [saving, setSaving] = useState(false);
+  const [deletingTestId, setDeletingTestId] = useState(null);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
   const [tests, setTests] = useState([]);
@@ -93,6 +97,38 @@ function UpcommingTest() {
     }
   };
 
+  const handleDeleteTest = async (testId, testName, testStatus) => {
+    if (testStatus !== 'scheduled') {
+      setError('Only scheduled tests can be deleted.');
+      return;
+    }
+
+    const ok = window.confirm(`Delete test "${testName}"? This cannot be undone.`);
+    if (!ok) return;
+
+    setError('');
+    setSuccess('');
+    setDeletingTestId(testId);
+
+    try {
+      const res = await fetch(`http://127.0.0.1:8000/api/upcoming-tests/${testId}/`, {
+        method: 'DELETE',
+      });
+
+      if (!res.ok) {
+        setError('Failed to delete test.');
+      } else {
+        setSuccess('Test deleted successfully.');
+        fetchTests();
+      }
+    } catch (err) {
+      console.error(err);
+      setError('Server error while deleting test.');
+    } finally {
+      setDeletingTestId(null);
+    }
+  };
+
   return (
     <div className="dashboard-layout">
       <aside className="sidebar">
@@ -124,7 +160,16 @@ function UpcommingTest() {
             <span className="search-icon">🗓️</span>
             <input type="text" value="Schedule and manage upcoming tests" readOnly className="search-input" />
           </div>
-          <button className="btn-primary" onClick={() => navigate('/studentDB')}>Back to Dashboard</button>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+            <button className="btn-primary" onClick={() => navigate('/studentDB')}>Back to Dashboard</button>
+            <div className="user-profile-section">
+              <div className="user-info">
+                <span className="user-name">{teacherName}</span>
+                <span className="user-role">{department}</span>
+              </div>
+              <img src={avatar} alt="Teacher" className="user-avatar" />
+            </div>
+          </div>
         </header>
 
         <div className="dashboard-body">
@@ -141,7 +186,12 @@ function UpcommingTest() {
                 <input name="test_name" value={formData.test_name} onChange={handleChange} placeholder="Test Name" required style={{ padding: 10, border: '1px solid #d1d5db', borderRadius: 8 }} />
               </div>
 
-              <input name="subject" value={formData.subject} onChange={handleChange} placeholder="Subject" required style={{ padding: 10, border: '1px solid #d1d5db', borderRadius: 8 }} />
+              <SubjectSelectorWithManager
+                value={formData.subject}
+                onChange={(selectedSubject) => setFormData((prev) => ({ ...prev, subject: selectedSubject }))}
+                required
+                selectPlaceholder="Select Subject"
+              />
 
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
                 <input type="date" name="test_date" value={formData.test_date} onChange={handleChange} required style={{ padding: 10, border: '1px solid #d1d5db', borderRadius: 8 }} />
@@ -169,11 +219,13 @@ function UpcommingTest() {
                   <th>Date</th>
                   <th>Total Marks</th>
                   <th>Class</th>
+                  <th>Status</th>
+                  <th>Action</th>
                 </tr>
               </thead>
               <tbody>
                 {tests.length === 0 ? (
-                  <tr><td colSpan="5" style={{ textAlign: 'center', padding: 24 }}>No tests scheduled yet.</td></tr>
+                  <tr><td colSpan="7" style={{ textAlign: 'center', padding: 24 }}>No tests scheduled yet.</td></tr>
                 ) : tests.map((t) => (
                   <tr key={t.id}>
                     <td>{t.test_name}</td>
@@ -181,6 +233,70 @@ function UpcommingTest() {
                     <td>{t.test_date}</td>
                     <td>{t.total_marks}</td>
                     <td>{t.class_name}</td>
+                    <td>
+                      <span style={{
+                        padding: '3px 12px',
+                        borderRadius: 20,
+                        fontSize: 12,
+                        fontWeight: 600,
+                        background: t.status === 'finished' ? '#d1fae5' : '#fef3c7',
+                        color: t.status === 'finished' ? '#065f46' : '#92400e',
+                      }}>
+                        {t.status === 'finished' ? '✅ Finished' : '🕐 Scheduled'}
+                      </span>
+                    </td>
+                    <td>
+                      <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+                        {t.status !== 'finished' ? (
+                          <button
+                            className="btn-primary"
+                            style={{ padding: '6px 14px', fontSize: 13 }}
+                            onClick={() => navigate(`/bulk-mark-entry/${t.id}`)}
+                          >
+                            Enter Marks
+                          </button>
+                        ) : (
+                          <button
+                            style={{
+                              padding: '6px 14px',
+                              fontSize: 13,
+                              background: '#f3f4f6',
+                              color: '#6b7280',
+                              border: 'none',
+                              borderRadius: 6,
+                              cursor: 'pointer',
+                            }}
+                            onClick={() => navigate(`/bulk-mark-entry/${t.id}`)}
+                          >
+                            View Entry
+                          </button>
+                        )}
+
+                        {t.status === 'scheduled' ? (
+                          <button
+                            type="button"
+                            onClick={() => handleDeleteTest(t.id, t.test_name, t.status)}
+                            disabled={deletingTestId === t.id}
+                            style={{
+                              padding: '6px 12px',
+                              fontSize: 13,
+                              background: deletingTestId === t.id ? '#fca5a5' : '#ef4444',
+                              color: 'white',
+                              border: 'none',
+                              borderRadius: 6,
+                              cursor: deletingTestId === t.id ? 'not-allowed' : 'pointer',
+                              opacity: deletingTestId === t.id ? 0.75 : 1,
+                            }}
+                          >
+                            {deletingTestId === t.id ? 'Deleting...' : 'Delete'}
+                          </button>
+                        ) : (
+                          <span style={{ fontSize: 12, color: '#94a3b8' }}>
+                            Deletion disabled
+                          </span>
+                        )}
+                      </div>
+                    </td>
                   </tr>
                 ))}
               </tbody>

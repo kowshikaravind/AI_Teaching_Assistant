@@ -2,33 +2,33 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import './Login.css';
 
-function Login() {
+function AdminLogin() {
   const navigate = useNavigate();
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
 
-  const handleSignIn = async (e) => {
+  const handleLogin = async (e) => {
     e.preventDefault();
     setError('');
     setLoading(true);
 
     try {
-      const res = await fetch('http://127.0.0.1:8000/api/teacher-login/', {
+      const res = await fetch('http://127.0.0.1:8000/api/admin-login/', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ username, password }),
       });
-
       const data = await res.json();
+
       if (!res.ok) {
-        setError(data.error || 'Login failed.');
+        setError(data.error || 'Admin login failed.');
         return;
       }
 
-      localStorage.setItem('teacherUser', JSON.stringify(data));
-      navigate('/studentDB');
+      localStorage.setItem('adminUser', JSON.stringify({ username: data.username, role: 'admin' }));
+      navigate('/admin-dashboard');
     } catch (err) {
       console.error(err);
       setError('Server error. Please try again.');
@@ -39,7 +39,6 @@ function Login() {
 
   return (
     <div className="login-page-wrapper">
-
       <div className="login-bokeh login-bokeh-1"></div>
       <div className="login-bokeh login-bokeh-2"></div>
       <div className="login-bokeh login-bokeh-3"></div>
@@ -47,20 +46,18 @@ function Login() {
       <div className="login-card">
         <div className="login-icon-container">
           <svg className="login-icon" viewBox="0 0 24 24" fill="currentColor">
-            <path d="M12 3L1 9L5 11.18V17.18L12 21L19 17.18V11.18L21 10.09V17H23V9L12 3ZM18.82 9L12 12.72L5.18 9L12 5.28L18.82 9ZM17 15.99L12 18.72L7 15.99V12.27L12 15L17 12.27V15.99Z"/>
+            <path d="M12 2L4 5V11C4 16.55 7.84 21.74 12 23C16.16 21.74 20 16.55 20 11V5L12 2ZM12 4.18L18 6.47V11C18 15.76 14.97 19.95 12 21.14C9.03 19.95 6 15.76 6 11V6.47L12 4.18ZM11 7V12.17L14.59 15.76L16 14.35L13 11.35V7H11Z" />
           </svg>
         </div>
 
-        <h2 className="login-title">Welcome Back</h2>
-        <p className="login-subtitle">
-          Please enter your credentials to continue as <span className="login-role-text">Faculty</span>
-        </p>
+        <h2 className="login-title">Admin Portal</h2>
+        <p className="login-subtitle">Use admin credentials to manage teacher access</p>
 
-        <form className="login-form" onSubmit={handleSignIn}>
+        <form className="login-form" onSubmit={handleLogin}>
           <input
             type="text"
             className="login-input"
-            placeholder="Username"
+            placeholder="Admin Username"
             value={username}
             onChange={(e) => setUsername(e.target.value)}
             required
@@ -68,7 +65,7 @@ function Login() {
           <input
             type="password"
             className="login-input"
-            placeholder="Password"
+            placeholder="Admin Password"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             required
@@ -76,33 +73,21 @@ function Login() {
 
           {error && (
             <p style={{ color: '#ef4444', fontSize: '0.85rem', marginTop: '-8px', textAlign: 'center' }}>
-              ⚠ {error}
+              {error}
             </p>
           )}
-
-          <div className="login-forgot-container">
-            <a href="#" className="login-forgot-link">Forgot Password?</a>
-          </div>
 
           <button type="submit" className="login-submit-btn" disabled={loading}>
             {loading ? 'Verifying...' : 'Sign In'}
           </button>
         </form>
 
-        <button className="teacher-create-btn" onClick={() => navigate('/teacher-register')}>
-          Create Teacher Account
-        </button>
-
         <button className="login-back-btn" onClick={() => navigate('/')}>
           &larr; Back to Role Selection
         </button>
-      </div>
-
-      <div className="login-footer">
-        &copy; 2026 Academic Performance Tracker. All rights reserved.
       </div>
     </div>
   );
 }
 
-export default Login;
+export default AdminLogin;

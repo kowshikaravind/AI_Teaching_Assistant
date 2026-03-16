@@ -69,6 +69,15 @@ function Profile() {
     setSaveMessage('Reverted unsaved changes.');
   };
 
+  const handleThemeToggle = () => {
+    const newLightMode = !lightMode;
+    setLightMode(newLightMode);
+    saveAppSettings({
+      themeMode: newLightMode ? 'light' : 'dark',
+      fontSize,
+    });
+  };
+
   const handlePasswordChange = async () => {
     setPasswordErr('');
     setPasswordMsg('');
@@ -273,7 +282,7 @@ function Profile() {
                 <span>Light Mode</span>
               </div>
               <label className="toggle-switch">
-                <input type="checkbox" checked={lightMode} onChange={() => setLightMode(!lightMode)} />
+                <input type="checkbox" checked={lightMode} onChange={handleThemeToggle} />
                 <span className="slider"></span>
               </label>
             </div>
