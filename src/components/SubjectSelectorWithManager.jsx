@@ -28,7 +28,13 @@ function SubjectSelectorWithManager({
   }, []);
 
   useEffect(() => {
-    fetchSubjects();
+    const rafId = window.requestAnimationFrame(() => {
+      fetchSubjects();
+    });
+
+    return () => {
+      window.cancelAnimationFrame(rafId);
+    };
   }, [fetchSubjects]);
 
   const sortedSubjects = useMemo(

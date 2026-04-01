@@ -135,8 +135,6 @@ function Profile() {
         </div>
         
         <div className="navbar-actions">
-          <button className="icon-btn">🔔</button>
-          <button className="icon-btn">❔</button>
           <img
             src={`https://ui-avatars.com/api/?name=${student?.name || 'Student'}&background=fce7f3&color=9d174d`}
             alt="Profile"
@@ -168,7 +166,6 @@ function Profile() {
             
             <div className="avatar-edit-section">
               <img src={`https://ui-avatars.com/api/?name=${student?.name || 'Student'}&background=fce7f3&color=9d174d&size=150`} alt="Avatar" className="large-avatar" />
-              <button className="update-photo-link">Update Photo</button>
             </div>
 
             <div className="form-fields-section">

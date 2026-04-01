@@ -8,11 +8,66 @@ function TeacherRegister() {
     teacher_name: '',
     username: '',
     password: '',
-    department: '',
+    assigned_class: '',
   });
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
   const [loading, setLoading] = useState(false);
+  const [classNames, setClassNames] = useState([]);
+  const [loadingClasses, setLoadingClasses] = useState(true);
+
+  // Fetch available class names from students
+  React.useEffect(() => {
+    let cancelled = false;
+    let timeoutId;
+
+    const fetchClassNames = async () => {
+      try {
+        const res = await fetch('http://127.0.0.1:8000/api/students/');
+        
+        if (!res.ok) {
+          throw new Error(`API returned ${res.status}`);
+        }
+
+        const data = await res.json();
+
+        // Handle both paginated and non-paginated responses
+        let students = [];
+        if (Array.isArray(data)) {
+          students = data;
+        } else if (data?.results && Array.isArray(data.results)) {
+          students = data.results;
+        }
+
+        // Extract unique class names from student data
+        const uniqueClasses = [...new Set(
+          students
+            .map(s => s.class_name)
+            .filter(name => name && name.trim())
+        )].sort();
+
+        if (!cancelled) {
+          setClassNames(uniqueClasses);
+        }
+      } catch (err) {
+        console.error('Failed to load class names:', err);
+        if (!cancelled) {
+          setClassNames([]);
+        }
+      } finally {
+        if (!cancelled) {
+          setLoadingClasses(false);
+        }
+      }
+    };
+
+    timeoutId = setTimeout(fetchClassNames, 500);
+
+    return () => {
+      cancelled = true;
+      clearTimeout(timeoutId);
+    };
+  }, []);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -39,7 +94,7 @@ function TeacherRegister() {
       }
 
       setSuccess(data.message || 'Request submitted. Waiting for admin approval.');
-      setFormData({ teacher_name: '', username: '', password: '', department: '' });
+      setFormData({ teacher_name: '', username: '', password: '', assigned_class: '' });
     } catch (err) {
       console.error(err);
       setError('Server error. Please try again.');
@@ -92,14 +147,27 @@ function TeacherRegister() {
             onChange={handleChange}
             required
           />
-          <input
-            type="text"
-            name="department"
+          <select
+            name="assigned_class"
             className="login-input"
-            placeholder="Department (optional)"
-            value={formData.department}
+            value={formData.assigned_class}
             onChange={handleChange}
-          />
+            required
+            disabled={loadingClasses}
+          >
+            <option value="">
+              {loadingClasses ? 'Loading classes...' : 'Select Class Name'}
+            </option>
+            {classNames.length > 0 ? (
+              classNames.map((className) => (
+                <option key={className} value={className}>
+                  {className}
+                </option>
+              ))
+            ) : (
+              !loadingClasses && <option disabled>No classes available</option>
+            )}
+          </select>
 
           {error && <p style={{ color: '#ef4444', fontSize: '0.85rem' }}>{error}</p>}
           {success && <p style={{ color: '#16a34a', fontSize: '0.85rem' }}>{success}</p>}

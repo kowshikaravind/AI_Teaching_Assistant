@@ -1,17 +1,29 @@
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import './Login.css';
 
 function AdminLogin() {
   const navigate = useNavigate();
+  const location = useLocation();
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
+  const [success, setSuccess] = useState('');
   const [loading, setLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
+
+  const isFormValid = username.trim().length >= 3 && password.length >= 6;
 
   const handleLogin = async (e) => {
     e.preventDefault();
     setError('');
+    setSuccess('');
+
+    if (!isFormValid) {
+      setError('Enter a valid admin username and password (minimum 6 characters).');
+      return;
+    }
+
     setLoading(true);
 
     try {
@@ -28,7 +40,11 @@ function AdminLogin() {
       }
 
       localStorage.setItem('adminUser', JSON.stringify({ username: data.username, role: 'admin' }));
-      navigate('/admin-dashboard');
+      const redirectTo = location.state?.redirectTo || '/admin-dashboard';
+      setSuccess('Admin authenticated. Redirecting...');
+      window.setTimeout(() => {
+        navigate(redirectTo, { replace: true });
+      }, 450);
     } catch (err) {
       console.error(err);
       setError('Server error. Please try again.');
@@ -54,30 +70,53 @@ function AdminLogin() {
         <p className="login-subtitle">Use admin credentials to manage teacher access</p>
 
         <form className="login-form" onSubmit={handleLogin}>
-          <input
-            type="text"
-            className="login-input"
-            placeholder="Admin Username"
-            value={username}
-            onChange={(e) => setUsername(e.target.value)}
-            required
-          />
-          <input
-            type="password"
-            className="login-input"
-            placeholder="Admin Password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            required
-          />
+          <div className="login-field-wrap">
+            <input
+              type="text"
+              className="login-input"
+              placeholder="Admin Username"
+              value={username}
+              onChange={(e) => setUsername(e.target.value)}
+              required
+              autoComplete="username"
+              aria-invalid={Boolean(error) && username.trim().length < 3}
+            />
+          </div>
+
+          <div className="login-field-wrap">
+            <input
+              type={showPassword ? 'text' : 'password'}
+              className="login-input"
+              placeholder="Admin Password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              required
+              autoComplete="current-password"
+              aria-invalid={Boolean(error) && password.length < 6}
+            />
+            <button
+              type="button"
+              className="password-toggle-btn"
+              onClick={() => setShowPassword((prev) => !prev)}
+              aria-label={showPassword ? 'Hide password' : 'Show password'}
+            >
+              {showPassword ? 'Hide' : 'Show'}
+            </button>
+          </div>
 
           {error && (
-            <p style={{ color: '#ef4444', fontSize: '0.85rem', marginTop: '-8px', textAlign: 'center' }}>
+            <p className="login-feedback error-text" role="alert">
               {error}
             </p>
           )}
 
-          <button type="submit" className="login-submit-btn" disabled={loading}>
+          {!error && success && (
+            <p className="login-feedback success-text" role="status">
+              {success}
+            </p>
+          )}
+
+          <button type="submit" className="login-submit-btn" disabled={loading || !isFormValid}>
             {loading ? 'Verifying...' : 'Sign In'}
           </button>
         </form>

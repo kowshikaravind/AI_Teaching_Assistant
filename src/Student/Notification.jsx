@@ -5,12 +5,16 @@ import './Student.css';
 function Notification() {
 	const navigate = useNavigate();
 	const [student, setStudent] = useState(null);
-	const [attendance, setAttendance] = useState(null);
 	const [loading, setLoading] = useState(true);
+	const [error, setError] = useState('');
 	const [showSettings, setShowSettings] = useState(false);
 	const [notifications, setNotifications] = useState([]);
 	const [categoryFilter, setCategoryFilter] = useState('all');
 	const [subjectFilter, setSubjectFilter] = useState('all');
+	const [searchText, setSearchText] = useState('');
+	const [activeTab, setActiveTab] = useState('all');
+	const [processingAllRead, setProcessingAllRead] = useState(false);
+	const [processingReadId, setProcessingReadId] = useState(null);
 
 	const studentUser = JSON.parse(localStorage.getItem('studentUser') || '{}');
 	const studentId = studentUser?.id;
@@ -23,9 +27,9 @@ function Notification() {
 
 		const fetchContext = async () => {
 			try {
-				const [studentRes, attendanceRes, notificationRes] = await Promise.all([
+				setError('');
+				const [studentRes, notificationRes] = await Promise.all([
 					fetch(`http://127.0.0.1:8000/api/students/${studentId}/`),
-					fetch(`http://127.0.0.1:8000/api/students/${studentId}/attendance-summary/`),
 					fetch(`http://127.0.0.1:8000/api/notifications/?student_id=${studentId}&recipient=student`),
 				]);
 
@@ -34,13 +38,12 @@ function Notification() {
 				}
 
 				const studentData = await studentRes.json();
-				const attendanceData = attendanceRes.ok ? await attendanceRes.json() : null;
 				const notificationData = notificationRes.ok ? await notificationRes.json() : [];
 				setStudent(studentData);
-				setAttendance(attendanceData);
 				setNotifications(Array.isArray(notificationData) ? notificationData : []);
 			} catch (err) {
 				console.error(err);
+				setError('Unable to load notifications right now. Please try again.');
 			} finally {
 				setLoading(false);
 			}
@@ -53,9 +56,12 @@ function Notification() {
 		return notifications.filter((n) => {
 			const categoryOk = categoryFilter === 'all' || n.type === categoryFilter;
 			const subjectOk = subjectFilter === 'all' || (n.subject || '').toLowerCase() === subjectFilter.toLowerCase();
-			return categoryOk && subjectOk;
+			const tabOk = activeTab === 'all' || !n.read_status;
+			const searchable = `${n.message || ''} ${n.subject || ''}`.toLowerCase();
+			const searchOk = !searchText.trim() || searchable.includes(searchText.trim().toLowerCase());
+			return categoryOk && subjectOk && tabOk && searchOk;
 		});
-	}, [notifications, categoryFilter, subjectFilter]);
+	}, [notifications, categoryFilter, subjectFilter, activeTab, searchText]);
 
 	const subjectOptions = useMemo(() => {
 		const set = new Set(
@@ -70,6 +76,7 @@ function Notification() {
 
 	const markAllRead = async () => {
 		try {
+			setProcessingAllRead(true);
 			await fetch('http://127.0.0.1:8000/api/notifications/mark-all-read/', {
 				method: 'POST',
 				headers: { 'Content-Type': 'application/json' },
@@ -78,15 +85,22 @@ function Notification() {
 			setNotifications((prev) => prev.map((n) => ({ ...n, read_status: true })));
 		} catch (err) {
 			console.error(err);
+			setError('Failed to mark notifications as read.');
+		} finally {
+			setProcessingAllRead(false);
 		}
 	};
 
 	const markRead = async (id) => {
 		try {
+			setProcessingReadId(id);
 			await fetch(`http://127.0.0.1:8000/api/notifications/${id}/read/`, { method: 'PATCH' });
 			setNotifications((prev) => prev.map((n) => (n.id === id ? { ...n, read_status: true } : n)));
 		} catch (err) {
 			console.error(err);
+			setError('Failed to update this notification.');
+		} finally {
+			setProcessingReadId(null);
 		}
 	};
 
@@ -155,37 +169,64 @@ function Notification() {
 			</aside>
 
 			<main className="nt-main">
-				<section className="nt-center">
-					<h1>Nexus Center</h1>
-					<p>Your cognitive hub for all recent academic activity and real-time updates.</p>
-
-					<div className="nt-orbit-wrap">
-						<div className="nt-orbit-ring">
-							<div className="nt-orbit-core">
-								<span>✦</span>
-							</div>
+				<section className="nt-panel">
+					<header className="nt-panel-header">
+						<div>
+							<h1>Notifications</h1>
+							<p>Stay updated with tests, AI alerts, and class activity.</p>
 						</div>
-						{unreadCount > 0 && <div className="nt-badge">{unreadCount}</div>}
+						<div className="nt-summary-chip">
+							Unread <b>{unreadCount}</b>
+						</div>
+					</header>
+
+					<div className="nt-toolbar">
+						<div className="nt-tabs" role="tablist" aria-label="Notification filter tabs">
+							<button
+								className={`nt-tab ${activeTab === 'all' ? 'active' : ''}`}
+								onClick={() => setActiveTab('all')}
+							>
+								All
+							</button>
+							<button
+								className={`nt-tab ${activeTab === 'unread' ? 'active' : ''}`}
+								onClick={() => setActiveTab('unread')}
+							>
+								Unread
+							</button>
+						</div>
+
+						<button
+							className="nt-mark-all"
+							onClick={markAllRead}
+							disabled={processingAllRead || unreadCount === 0}
+						>
+							{processingAllRead ? 'Marking...' : 'Mark all as read'}
+						</button>
 					</div>
 
-					<div className="nt-actions">
-						<button className="primary" onClick={markAllRead}>Mark All Read</button>
-					</div>
-
-					<div style={{ marginTop: 18, display: 'grid', gap: 10 }}>
+					<div className="nt-filters">
+						<input
+							type="text"
+							value={searchText}
+							onChange={(e) => setSearchText(e.target.value)}
+							placeholder="Search notifications"
+							className="nt-search"
+						/>
 						<select
 							value={categoryFilter}
 							onChange={(e) => setCategoryFilter(e.target.value)}
-							style={{ padding: 8, borderRadius: 8, border: '1px solid #dbe3ff', background: '#fff' , color:'black' }}
+							className="nt-select"
 						>
 							<option value="all">All Categories</option>
 							<option value="test">Upcoming Tests</option>
 							<option value="ai_warning">AI Performance Alerts</option>
+							<option value="teacher_alert">Teacher Alerts</option>
 						</select>
 						<select
 							value={subjectFilter}
 							onChange={(e) => setSubjectFilter(e.target.value)}
-							style={{ padding: 8, borderRadius: 8, border: '1px solid #dbe3ff', background: '#fff', color:'black'  }}
+							className="nt-select"
 						>
 							<option value="all">All Subjects</option>
 							{subjectOptions.map((subj) => (
@@ -193,57 +234,44 @@ function Notification() {
 							))}
 						</select>
 					</div>
+
+					{error && <p className="nt-error">{error}</p>}
+
+					{filteredNotifications.length === 0 ? (
+						<p className="nt-empty">No notifications found for current filters.</p>
+					) : (
+						<div className="nt-list">
+							{filteredNotifications.map((item) => (
+								<article key={item.id} className={`nt-feed-card ${!item.read_status ? 'unread' : 'read'}`}>
+									<div className="nt-feed-head">
+										<div>
+											<h4>
+												{item.type === 'test'
+													? `Upcoming Test${item.subject ? `: ${item.subject}` : ''}`
+													: item.type === 'ai_warning'
+														? `AI Alert${item.subject ? `: ${item.subject}` : ''}`
+														: `Teacher Alert${item.subject ? `: ${item.subject}` : ''}`}
+											</h4>
+											<span>{new Date(item.timestamp).toLocaleString()}</span>
+										</div>
+										{!item.read_status && <span className="nt-unread-dot" aria-label="Unread"></span>}
+									</div>
+									<p>{item.message}</p>
+									{!item.read_status && (
+										<button
+											className="nt-mark-read"
+											onClick={() => markRead(item.id)}
+											disabled={processingReadId === item.id}
+										>
+											{processingReadId === item.id ? 'Updating...' : 'Mark as read'}
+										</button>
+									)}
+								</article>
+							))}
+						</div>
+					)}
 				</section>
 			</main>
-
-			<aside className="nt-right">
-				<div className="nt-right-head">
-					<h3>Activity Stream</h3>
-				</div>
-
-				{filteredNotifications.length === 0 ? (
-					<p className="nt-empty">No notifications left. You're all caught up.</p>
-				) : (
-					<div className="nt-cards">
-						{filteredNotifications.map((item) => (
-							
-							<article key={item.id} className={`nt-card ${item.type}`}>
-								<div className="nt-card-top">
-									<h4>
-										{item.type === 'test'
-											? `Upcoming Test${item.subject ? `: ${item.subject}` : ''}`
-											: item.type === 'ai_warning'
-												? `AI Alert${item.subject ? `: ${item.subject}` : ''}`
-												: `Teacher Alert${item.subject ? `: ${item.subject}` : ''}`}
-									</h4>
-									<span>{new Date(item.timestamp).toLocaleString()}</span>
-								</div>
-								<p>{item.message}</p>
-								{!item.read_status && (
-									<button
-										onClick={() => markRead(item.id)}
-										style={{ marginTop: 8, borderRadius: 8, border: 'none', padding: '6px 10px', cursor: 'pointer' }}
-									>
-										Mark as read
-									</button>
-								)}
-							</article>
-						))}
-					</div>
-				)}
-
-				<button className="nt-link-btn">View Past Activity</button>
-
-				<div className="nt-storage">
-					<div className="nt-storage-head">
-						<span>Storage Sync</span>
-						<b>{attendance?.percentage ?? 0}%</b>
-					</div>
-					<div className="nt-storage-bar">
-						<div style={{ width: `${attendance?.percentage ?? 0}%` }} />
-					</div>
-				</div>
-			</aside>
 		</div>
 	);
 }

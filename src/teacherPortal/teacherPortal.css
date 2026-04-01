@@ -1,0 +1,859 @@
+/* ============================================================
+   EDUDASH TEACHER PORTAL — REDESIGNED UI
+   ============================================================ */
+
+/* ---- App wrapper ----------------------------------------- */
+.edudash-app {
+  min-height: 100vh;
+  background: #f4f6f9;
+  font-family: 'Inter', 'Segoe UI', sans-serif;
+}
+
+/* ---- Top Bar --------------------------------------------- */
+.edudash-topbar {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  height: 64px;
+  background: #ffffff;
+  border-bottom: 1px solid #e5e7eb;
+  display: flex;
+  align-items: center;
+  padding: 0 36px;
+  gap: 24px;
+}
+
+.edudash-brand {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  flex-shrink: 0;
+  cursor: pointer;
+  user-select: none;
+}
+
+.edudash-brand-icon {
+  width: 34px;
+  height: 34px;
+  background: #f26e3a;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 17px;
+  color: #fff;
+}
+
+.edudash-brand-name {
+  font-size: 19px;
+  font-weight: 800;
+  color: #f26e3a;
+  letter-spacing: -0.4px;
+}
+
+/* Nav tabs (inner pages) */
+.edudash-nav-links {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  flex: 1;
+}
+
+.edudash-nav-tab {
+  padding: 7px 14px;
+  border-radius: 8px;
+  border: none;
+  background: none;
+  font-size: 13.5px;
+  font-weight: 500;
+  color: #6b7280;
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s;
+  white-space: nowrap;
+}
+
+.edudash-nav-tab:hover {
+  background: #f3f4f6;
+  color: #111827;
+}
+
+.edudash-nav-tab.active {
+  background: #fff2ed;
+  color: #f26e3a;
+  font-weight: 600;
+}
+
+/* Topbar right section */
+.edudash-topbar-end {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  flex-shrink: 0;
+  margin-left: auto;
+}
+
+.edudash-switch-course-btn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 16px;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  background: #fff;
+  font-size: 13px;
+  font-weight: 500;
+  color: #374151;
+  cursor: pointer;
+  transition: border-color 0.15s, background 0.15s;
+}
+
+.edudash-switch-course-btn:hover {
+  border-color: #d1d5db;
+  background: #f9fafb;
+}
+
+.edudash-user-chip {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.edudash-user-info {
+  text-align: right;
+}
+
+.edudash-user-name {
+  display: block;
+  font-size: 14px;
+  font-weight: 600;
+  color: #111827;
+  line-height: 1.2;
+}
+
+.edudash-user-role {
+  display: block;
+  font-size: 11px;
+  color: #6b7280;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.edudash-avatar {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid #e5e7eb;
+}
+
+/* ---- Inner Page Layout (TeacherPortalLayout) ------------- */
+.edudash-inner-main {
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 36px 40px;
+}
+
+.edudash-inner-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  margin-bottom: 28px;
+  gap: 20px;
+}
+
+.edudash-inner-title {
+  margin: 0;
+  font-size: 26px;
+  font-weight: 700;
+  color: #111827;
+  line-height: 1.2;
+}
+
+.edudash-inner-subtitle {
+  margin: 6px 0 0;
+  font-size: 13.5px;
+  color: #6b7280;
+  line-height: 1.5;
+}
+
+.edudash-inner-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-shrink: 0;
+}
+
+/* ---- Dashboard Course Header ----------------------------- */
+.edudash-course-header {
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 32px 40px 0;
+}
+
+.edudash-breadcrumb {
+  font-size: 11px;
+  font-weight: 600;
+  color: #9ca3af;
+  letter-spacing: 0.8px;
+  text-transform: uppercase;
+  margin-bottom: 14px;
+}
+
+.edudash-breadcrumb .bc-sep {
+  color: #f26e3a;
+  margin: 0 6px;
+}
+
+.edudash-breadcrumb .bc-active {
+  color: #f26e3a;
+}
+
+.edudash-course-title-row {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin-bottom: 14px;
+}
+
+.edudash-course-name {
+  margin: 0;
+  font-size: 32px;
+  font-weight: 800;
+  color: #111827;
+  letter-spacing: -0.6px;
+}
+
+.edudash-course-sep {
+  color: #9ca3af;
+  font-size: 28px;
+  font-weight: 300;
+  line-height: 1;
+}
+
+.edudash-course-section-label {
+  font-size: 26px;
+  font-weight: 500;
+  color: #6b7280;
+}
+
+.edudash-course-meta-row {
+  display: flex;
+  align-items: center;
+  gap: 22px;
+  flex-wrap: wrap;
+  padding-bottom: 26px;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.edudash-meta-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+  color: #6b7280;
+  font-weight: 500;
+}
+
+.edudash-course-btns {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-left: auto;
+}
+
+.edudash-settings-btn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 9px 18px;
+  border: 1px solid #d1d5db;
+  border-radius: 10px;
+  background: #fff;
+  font-size: 13px;
+  font-weight: 500;
+  color: #374151;
+  cursor: pointer;
+  transition: border-color 0.15s;
+}
+
+.edudash-settings-btn:hover {
+  border-color: #9ca3af;
+}
+
+.edudash-quick-btn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 9px 20px;
+  border: none;
+  border-radius: 10px;
+  background: #f26e3a;
+  font-size: 13px;
+  font-weight: 600;
+  color: #fff;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.edudash-quick-btn:hover {
+  background: #e05a28;
+}
+
+/* ---- Module Cards Grid ----------------------------------- */
+.edudash-modules-section {
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 28px 40px;
+}
+
+.edudash-modules-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 20px;
+}
+
+.edudash-module-card {
+  background: #ffffff;
+  border: 1px solid #e5e7eb;
+  border-radius: 14px;
+  padding: 28px 24px;
+  cursor: pointer;
+  transition: box-shadow 0.2s, transform 0.18s;
+  position: relative;
+  overflow: hidden;
+}
+
+.edudash-module-card:hover {
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.08);
+  transform: translateY(-2px);
+}
+
+.edudash-module-card-disabled {
+  cursor: default;
+  border-style: dashed;
+  border-color: #d1d5db;
+  background: #fafafa;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  min-height: 200px;
+}
+
+.edudash-module-card-disabled:hover {
+  box-shadow: none;
+  transform: none;
+}
+
+.edudash-module-icon-wrap {
+  width: 52px;
+  height: 52px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 22px;
+  margin-bottom: 16px;
+}
+
+.edudash-module-icon-grey {
+  width: 44px;
+  height: 44px;
+  border-radius: 10px;
+  background: #e5e7eb;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 20px;
+  color: #9ca3af;
+  margin-bottom: 10px;
+}
+
+.edudash-module-title {
+  margin: 0 0 8px;
+  font-size: 17px;
+  font-weight: 700;
+  color: #111827;
+}
+
+.edudash-module-title-disabled {
+  margin: 4px 0 0;
+  font-size: 15px;
+  font-weight: 600;
+  color: #9ca3af;
+}
+
+.edudash-new-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 2px 8px;
+  background: #fff2ed;
+  color: #f26e3a;
+  border-radius: 20px;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  margin-left: 8px;
+  vertical-align: middle;
+}
+
+.edudash-module-desc {
+  margin: 0 0 20px;
+  font-size: 13px;
+  color: #6b7280;
+  line-height: 1.65;
+}
+
+.edudash-module-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  border: none;
+  background: none;
+  padding: 0;
+  font-size: 13px;
+  font-weight: 600;
+  color: #f26e3a;
+  cursor: pointer;
+  transition: gap 0.15s;
+}
+
+.edudash-module-link:hover {
+  gap: 8px;
+}
+
+.edudash-module-bg-icon {
+  position: absolute;
+  right: -12px;
+  bottom: -8px;
+  font-size: 80px;
+  opacity: 0.05;
+  pointer-events: none;
+  line-height: 1;
+  user-select: none;
+}
+
+/* ---- Analytics Section ----------------------------------- */
+.edudash-analytics-section {
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 0 40px 44px;
+}
+
+.edudash-analytics-card {
+  background: #ffffff;
+  border: 1px solid #e5e7eb;
+  border-radius: 14px;
+  padding: 24px 28px;
+}
+
+.edudash-analytics-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 20px;
+}
+
+.edudash-analytics-title {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 700;
+  color: #111827;
+}
+
+.edudash-analytics-menu {
+  border: none;
+  background: none;
+  font-size: 18px;
+  color: #6b7280;
+  cursor: pointer;
+  padding: 4px 8px;
+  border-radius: 6px;
+  letter-spacing: 2px;
+}
+
+.edudash-analytics-menu:hover {
+  background: #f3f4f6;
+}
+
+.edudash-analytics-row {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 24px;
+  border-top: 1px solid #f3f4f6;
+  padding-top: 20px;
+}
+
+.edudash-analytic-item {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.edudash-analytic-label {
+  font-size: 10.5px;
+  font-weight: 600;
+  color: #9ca3af;
+  letter-spacing: 0.8px;
+  text-transform: uppercase;
+}
+
+.edudash-analytic-value {
+  font-size: 28px;
+  font-weight: 800;
+  color: #111827;
+  letter-spacing: -0.5px;
+  line-height: 1;
+}
+
+.edudash-analytic-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 3px 10px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 600;
+  background: #f3f4f6;
+  color: #374151;
+  width: fit-content;
+}
+
+.edudash-analytic-badge.badge-green {
+  background: #dcfce7;
+  color: #15803d;
+}
+
+.edudash-analytic-badge.badge-orange {
+  background: #fff2ed;
+  color: #f26e3a;
+}
+
+.edudash-analytic-badge.badge-blue {
+  background: #dbeafe;
+  color: #2563eb;
+}
+
+.edudash-analytic-badge.badge-grey {
+  background: #f3f4f6;
+  color: #6b7280;
+}
+
+/* ---- Danger / utility buttons (from old design, kept for inner pages) */
+.tp-danger-btn {
+  padding: 8px 12px;
+  border-radius: 8px;
+  border: none;
+  background: #ef4444;
+  color: #fff;
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: 500;
+}
+
+.tp-danger-btn:disabled {
+  opacity: 0.65;
+  cursor: not-allowed;
+}
+
+/* ---- Shared layout utilities for inner page content ------ */
+.tp-loading,
+.tp-empty,
+.tp-error,
+.tp-success {
+  margin: 0;
+  padding: 24px;
+  color: #6b7280;
+}
+
+.tp-error { color: #dc2626; }
+.tp-success { color: #059669; }
+
+.tp-empty-centered {
+  padding: 24px;
+  text-align: center;
+  color: #9ca3af;
+}
+
+.tp-action-cell {
+  text-align: right;
+}
+
+.tp-inline-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
+.tp-form-grid {
+  display: grid;
+  gap: 18px;
+}
+
+.tp-error-inline { color: #dc2626; margin: 0; }
+.tp-success-inline { color: #059669; margin: 0; }
+
+.tp-form-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+}
+
+.tp-panel { padding: 24px; }
+
+.tp-search-wrap-wide { width: 320px; }
+.tp-search-wrap { width: 250px; }
+
+.tp-date-actions { display: flex; gap: 8px; }
+
+.tp-date-input {
+  padding: 10px 12px;
+  border-radius: 8px;
+  border: 1px solid #d1d5db;
+  background: #fff;
+  font-size: 13px;
+  color: #374151;
+  cursor: pointer;
+}
+
+/* Ensure date and datetime-local inputs display calendar icon properly */
+input[type="date"],
+input[type="datetime-local"],
+input[type="time"] {
+  padding: 10px 12px;
+  border-radius: 8px;
+  border: 1px solid #d1d5db;
+  background: #fff;
+  font-size: 13px;
+  color: #374151;
+  cursor: pointer;
+  min-height: 40px;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+input[type="date"]::-webkit-calendar-picker-indicator,
+input[type="datetime-local"]::-webkit-calendar-picker-indicator,
+input[type="time"]::-webkit-calendar-picker-indicator {
+  cursor: pointer;
+  padding: 4px;
+  margin-right: 4px;
+  filter: invert(0.8);
+  display: block !important;
+  opacity: 1 !important;
+}
+
+input[type="date"]:focus,
+input[type="datetime-local"]:focus,
+input[type="time"]:focus {
+  outline: none;
+  border-color: #f26e3a;
+  box-shadow: 0 0 0 3px rgba(242, 110, 58, 0.1);
+}
+
+/* General input styling */
+input[type="text"],
+input[type="number"],
+input[type="email"],
+input[type="password"],
+input[type="tel"],
+input[type="file"] {
+  padding: 10px 12px;
+  border-radius: 8px;
+  border: 1px solid #d1d5db;
+  background: #fff;
+  font-size: 13px;
+  color: #374151;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+/* Tests form section */
+.tp-tests-panel { margin-bottom: 20px; padding: 24px; }
+.tp-tests-form { display: grid; gap: 14px; }
+.tp-form-error { color: #dc2626; margin: 0; font-size: 13px; }
+.tp-form-error { color: #dc2626; margin: 0; }
+
+.tp-tests-actions-cell,
+.tp-table-action-cell { text-align: right; }
+
+.tp-tests-actions-wrap {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
+/* Mark entry */
+.tp-mark-input {
+  width: 110px;
+  padding: 8px 10px;
+  border-radius: 8px;
+  border: 1px solid #d1d5db;
+  font-size: 14px;
+  color: #111827;
+  background: #fff;
+}
+
+.tp-align-right { text-align: right; }
+
+/* AI chat (class insights page) */
+.tp-chat-shell {
+  padding: 24px;
+  min-height: 65vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.tp-chat-intro { margin-bottom: 18px; }
+.tp-chat-title { margin: 0 0 6px; color: #111827; font-size: 18px; font-weight: 700; }
+.tp-chat-subtitle { margin: 0; color: #6b7280; font-size: 13px; }
+
+.tp-suggestion-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  margin-bottom: 18px;
+}
+
+.tp-suggestion-btn {
+  padding: 12px 14px;
+  border-radius: 10px;
+  border: 1px solid #e5e7eb;
+  background: #fff;
+  text-align: left;
+  cursor: pointer;
+  color: #374151;
+  font-size: 13px;
+  transition: border-color 0.15s, background 0.15s;
+}
+
+.tp-suggestion-btn:hover {
+  border-color: #f26e3a;
+  background: #fff9f6;
+}
+
+.tp-chat-feed {
+  flex: 1;
+  overflow-y: auto;
+  display: grid;
+  gap: 12px;
+}
+
+.tp-chat-row { display: flex; }
+.tp-chat-row.tp-chat-row-user { justify-content: flex-end; }
+.tp-chat-row.tp-chat-row-model { justify-content: flex-start; }
+
+.tp-chat-bubble {
+  max-width: 72%;
+  padding: 12px 16px;
+  border-radius: 14px;
+  white-space: pre-wrap;
+  line-height: 1.65;
+  color: #111827;
+  background: #f3f4f6;
+  font-size: 14px;
+}
+
+.tp-chat-bubble.tp-chat-bubble-user {
+  background: #f26e3a;
+  color: #ffffff;
+}
+
+.tp-chat-thinking { color: #9ca3af; font-style: italic; font-size: 13px; }
+
+.tp-chat-input-row { display: flex; gap: 10px; margin-top: 16px; }
+
+.tp-chat-input {
+  color: #111827;
+  background: #ffffff;
+  border: 1px solid #e5e7eb;
+  border-radius: 10px;
+  padding: 10px 14px;
+  font-size: 14px;
+}
+
+.tp-chat-input::placeholder { color: #9ca3af; }
+
+/* AI panel on student detail page */
+.tp-detail-actions { margin-top: 18px; display: flex; gap: 10px; }
+.tp-detail-stack { display: grid; gap: 8px; color: #111827; }
+
+.tp-ai-panel { padding: 24px; display: flex; flex-direction: column; gap: 12px; }
+.tp-ai-title { margin-top: 0; color: #111827; font-size: 17px; font-weight: 700; }
+
+.tp-ai-suggestion {
+  padding: 10px 12px;
+  border-radius: 10px;
+  border: 1px solid #e5e7eb;
+  background: #fff;
+  text-align: left;
+  cursor: pointer;
+  color: #374151;
+  font-size: 13px;
+  transition: border-color 0.15s;
+}
+
+.tp-ai-suggestion:hover { border-color: #f26e3a; }
+
+.tp-ai-feed {
+  flex: 1;
+  max-height: 260px;
+  overflow-y: auto;
+  display: grid;
+  gap: 10px;
+}
+
+.tp-ai-bubble {
+  padding: 10px 12px;
+  border-radius: 10px;
+  background: #f3f4f6;
+  color: #111827;
+  white-space: pre-wrap;
+  line-height: 1.6;
+  font-size: 13.5px;
+}
+
+.tp-ai-bubble.tp-ai-bubble-user {
+  background: #f26e3a;
+  color: #ffffff;
+}
+
+.tp-ai-thinking { color: #9ca3af; font-style: italic; font-size: 13px; }
+.tp-ai-input-row { display: flex; gap: 8px; }
+
+/* ---- Responsive ------------------------------------------ */
+@media (max-width: 1100px) {
+  .edudash-modules-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  .edudash-analytics-row {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 768px) {
+  .edudash-modules-grid {
+    grid-template-columns: 1fr;
+  }
+  .edudash-topbar {
+    padding: 0 16px;
+    gap: 12px;
+  }
+  .edudash-nav-links {
+    gap: 0;
+    overflow-x: auto;
+  }
+  .edudash-course-header,
+  .edudash-modules-section,
+  .edudash-analytics-section,
+  .edudash-inner-main {
+    padding-left: 20px;
+    padding-right: 20px;
+  }
+  .tp-suggestion-grid {
+    grid-template-columns: 1fr;
+  }
+}

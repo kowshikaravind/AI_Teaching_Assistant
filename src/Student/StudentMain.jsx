@@ -11,7 +11,6 @@ ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, Title, T
 
 function StudentMain() {
   const [student, setStudent] = useState(null);
-  const [attendance, setAttendance] = useState(null);
   const [loading, setLoading] = useState(true);
   const [showSettings, setShowSettings] = useState(false);
   const [lightMode, setLightMode] = useState(() => {
@@ -42,14 +41,9 @@ function StudentMain() {
   useEffect(() => {
     const fetchAll = async () => {
       try {
-        const [studentRes, attendanceRes] = await Promise.all([
-          fetch(`http://127.0.0.1:8000/api/students/${STUDENT_ID}/`),
-          fetch(`http://127.0.0.1:8000/api/students/${STUDENT_ID}/attendance-summary/`)
-        ]);
+        const studentRes = await fetch(`http://127.0.0.1:8000/api/students/${STUDENT_ID}/`);
         const studentData = await studentRes.json();
-        const attendanceData = await attendanceRes.json();
         setStudent(studentData);
-        setAttendance(attendanceData);
       } catch (err) {
         console.error("Failed to fetch student data:", err);
       } finally {
@@ -284,25 +278,7 @@ function StudentMain() {
               </p>
             </div>
 
-            {/* ATTENDANCE */}
-            <div className="sd-card">
-              <div className="sd-card-header">
-                <h3>ATTENDANCE</h3>
-                <span className="sd-goal-percent">{attendance?.percentage ?? 0}%</span>
-              </div>
-              <div className="sd-progress-bar-bg">
-                <div className="sd-progress-bar-fill" style={{
-                  width: `${attendance?.percentage ?? 0}%`,
-                  background: attendance?.percentage >= 75 ? '#10b981' : attendance?.percentage >= 50 ? '#f59e0b' : '#ef4444'
-                }}></div>
-              </div>
-              <div className="sd-goal-footer">
-                <span>{attendance?.present ?? 0} present / {attendance?.total_sessions ?? 0} total</span>
-                <span style={{ color: attendance?.percentage >= 75 ? '#10b981' : '#ef4444' }}>
-                  {attendance?.percentage >= 75 ? 'Good standing' : 'Needs improvement'}
-                </span>
-              </div>
-            </div>
+
           </div>
 
           {/* RIGHT COLUMN */}
@@ -363,21 +339,6 @@ function StudentMain() {
                 {weakestSubject
                   ? `Focus on "${weakestSubject.name}" — your average is ${weakestSubject.score}%. Spend extra time reviewing it.`
                   : 'Add your test marks to get AI recommendations.'}
-              </p>
-            </div>
-          </div>
-
-          {/* ATTENDANCE WARNING */}
-          <div className="sd-widget widget-yellow">
-            <div className="widget-icon">⚠️</div>
-            <div>
-              <h4>Attendance Status</h4>
-              <p>
-                {attendance
-                  ? attendance.percentage >= 75
-                    ? `You have ${attendance.percentage}% attendance. Keep it up!`
-                    : `Your attendance is ${attendance.percentage}%. You have ${attendance.absent} absences. Try to attend more.`
-                  : 'No attendance data yet.'}
               </p>
             </div>
           </div>

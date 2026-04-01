@@ -223,7 +223,7 @@ function AdminDashboard() {
               <article className="admin-teacher-card" key={teacher.teacher_id}>
                 <h3>{teacher.teacher_name}</h3>
                 <p><strong>Email / Username:</strong> {teacher.username}</p>
-                <p><strong>Department:</strong> {teacher.department || 'N/A'}</p>
+                <p><strong>Assigned Class:</strong> {teacher.assigned_class || 'N/A'}</p>
                 <div className="admin-actions">
                   <button
                     className="admin-approve"
@@ -256,7 +256,7 @@ function AdminDashboard() {
               <article className="admin-teacher-card" key={teacher.teacher_id}>
                 <h3>{teacher.teacher_name}</h3>
                 <p><strong>Email / Username:</strong> {teacher.username}</p>
-                <p><strong>Department:</strong> {teacher.department || 'N/A'}</p>
+                <p><strong>Assigned Class:</strong> {teacher.assigned_class || 'N/A'}</p>
                 <div className="admin-actions">
                   <button
                     className="admin-reject"

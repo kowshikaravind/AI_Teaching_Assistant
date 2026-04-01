@@ -6,7 +6,12 @@ import { getTeacherSessionProfile } from '../utils/teacherSession.js';
 function AddStudent() {
   const navigate = useNavigate();
   const location = useLocation();
-  const { teacherName, department, avatar } = getTeacherSessionProfile();
+  const { teacherName, assignedClass, avatar } = getTeacherSessionProfile();
+  const returnTo = location.state?.returnTo || '/studentDB';
+  const teacherUser = JSON.parse(localStorage.getItem('teacherUser') || '{}');
+  const adminUser = JSON.parse(localStorage.getItem('adminUser') || '{}');
+  const hasTeacherAccess = teacherUser?.role === 'teacher';
+  const hasAdminAccess = adminUser?.role === 'admin';
   
   const isEditMode = location.state?.editMode || false;
   const existingData = location.state?.studentData || null;
@@ -56,6 +61,11 @@ function AddStudent() {
 
   // ── FETCH EXISTING CLASSES FROM DB ────────────────────────────
   useEffect(() => {
+    if (!hasTeacherAccess && !hasAdminAccess) {
+      navigate('/', { replace: true });
+      return;
+    }
+
     const fetchClasses = async () => {
       try {
         const res = await fetch("http://127.0.0.1:8000/api/students/");
@@ -67,7 +77,7 @@ function AddStudent() {
       }
     };
     fetchClasses();
-  }, []);
+  }, [hasTeacherAccess, hasAdminAccess, navigate]);
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -88,6 +98,11 @@ function AddStudent() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+
+    if (!hasTeacherAccess && !hasAdminAccess) {
+      navigate('/', { replace: true });
+      return;
+    }
     
     const url = isEditMode
       ? `http://127.0.0.1:8000/api/students/${existingData.id}/`
@@ -102,7 +117,7 @@ function AddStudent() {
       });
 
       if (res.ok) {
-        navigate("/studentDB");
+        navigate(returnTo);
       } else {
         const errorData = await res.json();
         console.error("Error:", errorData);
@@ -112,6 +127,10 @@ function AddStudent() {
       console.error("Error:", err);
     }
   };
+
+  if (!hasTeacherAccess && !hasAdminAccess) {
+    return null;
+  }
 
   return (
     <div className="dashboard-layout">
@@ -125,9 +144,9 @@ function AddStudent() {
           </div>
         </div>
         <nav className="sidebar-nav">
-          <a href="#" className="nav-item active" onClick={() => navigate("/studentDB")}><span className="nav-icon">▦</span> Dashboard</a>
+          <a href="#" className="nav-item active" onClick={() => navigate(returnTo)}><span className="nav-icon">▦</span> Dashboard</a>
           <a href="#" className="nav-item"><span className="nav-icon">👥</span> Students</a>
-          <a href="#" className="nav-item"><span className="nav-icon">📘</span> Attendance</a>
+          <a href="#" className="nav-item"><span className="nav-icon">📘</span> Upcoming Tests</a>
           <a href="#" className="nav-item"><span className="nav-icon">📊</span> Reports</a>
         </nav>
       </aside>
@@ -143,7 +162,7 @@ function AddStudent() {
             <div className="notification-bell">🔔</div>
             <div className="user-info">
               <span className="user-name">{teacherName}</span>
-              <span className="user-role">{department}</span>
+              <span className="user-role">Class: {assignedClass}</span>
             </div>
             <img src={avatar} alt="Teacher" className="user-avatar" />
           </div>
@@ -168,7 +187,6 @@ function AddStudent() {
               <div className="photo-text">
                 <h4>Student Photograph</h4>
                 <p>Upload a high-resolution formal photograph (JPG or PNG, max 2MB).</p>
-                <button type="button" className="browse-btn">Browse Files</button>
               </div>
             </div>
 

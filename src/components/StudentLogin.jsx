@@ -7,11 +7,22 @@ function StudentLogin() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
+  const [success, setSuccess] = useState('');
   const [loading, setLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
+
+  const isFormValid = email.includes('@') && password.length >= 6;
 
   const handleSignIn = async (e) => {
     e.preventDefault();
     setError('');
+    setSuccess('');
+
+    if (!isFormValid) {
+      setError('Please enter a valid email and password (minimum 6 characters).');
+      return;
+    }
+
     setLoading(true);
 
     try {
@@ -25,12 +36,23 @@ function StudentLogin() {
 
       if (res.ok) {
         localStorage.setItem('studentUser', JSON.stringify(data));
-        navigate(`/student-dashboard/${data.id}`);
+        setSuccess('Login successful. Redirecting...');
+        window.setTimeout(() => {
+          navigate(`/student-dashboard/${data.id}`);
+        }, 450);
       } else {
         setError(data.error || 'Login failed.');
       }
     } catch (err) {
-      setError('Server error. Please try again.');
+      const isConnectionRefused =
+        err instanceof TypeError
+        && /Failed to fetch|NetworkError/i.test(String(err.message || ''));
+
+      setError(
+        isConnectionRefused
+          ? 'Backend server is not running on http://127.0.0.1:8000. Start Django and try again.'
+          : 'Server error. Please try again.'
+      );
       console.error('Login error:', err);
     } finally {
       setLoading(false);
@@ -56,30 +78,53 @@ function StudentLogin() {
         </p>
 
         <form className="login-form" onSubmit={handleSignIn}>
-          <input
-            type="email"
-            className="login-input"
-            placeholder="Student Email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            required
-          />
-          <input
-            type="password"
-            className="login-input"
-            placeholder="Password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            required
-          />
+          <div className="login-field-wrap">
+            <input
+              type="email"
+              className="login-input"
+              placeholder="Student Email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              required
+              autoComplete="email"
+              aria-invalid={Boolean(error) && !email.includes('@')}
+            />
+          </div>
+
+          <div className="login-field-wrap">
+            <input
+              type={showPassword ? 'text' : 'password'}
+              className="login-input"
+              placeholder="Password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              required
+              autoComplete="current-password"
+              aria-invalid={Boolean(error) && password.length < 6}
+            />
+            <button
+              type="button"
+              className="password-toggle-btn"
+              onClick={() => setShowPassword((prev) => !prev)}
+              aria-label={showPassword ? 'Hide password' : 'Show password'}
+            >
+              {showPassword ? 'Hide' : 'Show'}
+            </button>
+          </div>
 
           {error && (
-            <p style={{ color: '#ef4444', fontSize: '0.85rem', marginTop: '-8px', textAlign: 'center' }}>
+            <p className="login-feedback error-text" role="alert">
               ⚠ {error}
             </p>
           )}
 
-          <button type="submit" className="login-submit-btn" disabled={loading}>
+          {!error && success && (
+            <p className="login-feedback success-text" role="status">
+              {success}
+            </p>
+          )}
+
+          <button type="submit" className="login-submit-btn" disabled={loading || !isFormValid}>
             {loading ? 'Verifying...' : 'Sign In'}
           </button>
         </form>

@@ -1,10 +1,27 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import './Login.css';
 
 function LoginType() {
   const navigate = useNavigate();
   const canvasRef = useRef(null);
+  const [activePortal, setActivePortal] = useState('');
+  const [navigatingTo, setNavigatingTo] = useState('');
+
+  const handlePortalOpen = (portalKey, path) => {
+    setActivePortal(portalKey);
+    setNavigatingTo(portalKey);
+    window.setTimeout(() => {
+      navigate(path);
+    }, 200);
+  };
+
+  const handleAllStudentsClick = () => {
+    setNavigatingTo('allStudents');
+    window.setTimeout(() => {
+      navigate('/admin-login', { state: { redirectTo: '/all-students' } });
+    }, 200);
+  };
 
   // Animated particle background
   useEffect(() => {
@@ -55,8 +72,12 @@ function LoginType() {
         <div className="lt-glow" />
         <div className="lt-rule" />
 
-        <button className="lt-admin-btn" onClick={() => navigate('/admin-login')}>
-          Admin Login
+        <button className="lt-admin-btn" onClick={() => handlePortalOpen('admin', '/admin-login')}>
+          {navigatingTo === 'admin' ? 'Opening...' : 'Admin Login'}
+        </button>
+
+        <button className="lt-all-students-btn" onClick={handleAllStudentsClick}>
+          {navigatingTo === 'allStudents' ? 'Opening...' : 'All Students'}
         </button>
 
         <div className="lt-wrapper">
@@ -82,7 +103,20 @@ function LoginType() {
           <div className="lt-cards">
 
             {/* Student Card */}
-            <div className="lt-card" onClick={() => navigate('/student-login')}>
+            <div
+              className={`lt-card ${activePortal === 'student' ? 'lt-card-active' : ''}`}
+              onClick={() => handlePortalOpen('student', '/student-login')}
+              onMouseEnter={() => setActivePortal('student')}
+              onMouseLeave={() => setActivePortal('')}
+              role="button"
+              tabIndex={0}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter' || e.key === ' ') {
+                  e.preventDefault();
+                  handlePortalOpen('student', '/student-login');
+                }
+              }}
+            >
               <div className="lt-card-accent" />
               <div className="lt-card-img-wrap">
                 <img
@@ -92,14 +126,27 @@ function LoginType() {
               </div>
               <p className="lt-card-label">Portal I</p>
               <h2 className="lt-card-title">Student<br />Access</h2>
-              <p className="lt-card-desc">View your marks, attendance & personalised AI insights</p>
+              <p className="lt-card-desc">View your marks and personalised AI insights</p>
               <button className="lt-card-btn">
-                Enter Portal <span className="lt-card-btn-arrow">→</span>
+                {navigatingTo === 'student' ? 'Opening...' : 'Enter Portal'} <span className="lt-card-btn-arrow">→</span>
               </button>
             </div>
 
             {/* Teacher Card */}
-            <div className="lt-card" onClick={() => navigate('/login')}>
+            <div
+              className={`lt-card ${activePortal === 'teacher' ? 'lt-card-active' : ''}`}
+              onClick={() => handlePortalOpen('teacher', '/teacher-login')}
+              onMouseEnter={() => setActivePortal('teacher')}
+              onMouseLeave={() => setActivePortal('')}
+              role="button"
+              tabIndex={0}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter' || e.key === ' ') {
+                  e.preventDefault();
+                  handlePortalOpen('teacher', '/teacher-login');
+                }
+              }}
+            >
               <div className="lt-card-accent" />
               <div className="lt-card-img-wrap">
                 <img
@@ -111,7 +158,7 @@ function LoginType() {
               <h2 className="lt-card-title">Faculty<br />Access</h2>
               <p className="lt-card-desc">Manage students, track performance & generate reports</p>
               <button className="lt-card-btn">
-                Enter Portal <span className="lt-card-btn-arrow">→</span>
+                {navigatingTo === 'teacher' ? 'Opening...' : 'Enter Portal'} <span className="lt-card-btn-arrow">→</span>
               </button>
             </div>
 

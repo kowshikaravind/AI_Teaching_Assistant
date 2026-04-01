@@ -11,7 +11,6 @@ ChartJS.register(CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend)
 function Performance() {
   const navigate = useNavigate();
   const [student, setStudent] = useState(null);
-  const [attendance, setAttendance] = useState(null);
   const [loading, setLoading] = useState(true);
   const [showSettings, setShowSettings] = useState(false);
 
@@ -22,12 +21,8 @@ function Performance() {
     if (!studentId) { navigate('/', { replace: true }); return; }
     const fetchAll = async () => {
       try {
-        const [sRes, aRes] = await Promise.all([
-          fetch(`http://127.0.0.1:8000/api/students/${studentId}/`),
-          fetch(`http://127.0.0.1:8000/api/students/${studentId}/attendance-summary/`)
-        ]);
+        const sRes = await fetch(`http://127.0.0.1:8000/api/students/${studentId}/`);
         setStudent(await sRes.json());
-        setAttendance(await aRes.json());
       } catch (err) {
         console.error(err);
       } finally {
@@ -56,10 +51,6 @@ function Performance() {
     if (!subjectAverages.length) return 0;
     return Math.round(subjectAverages.reduce((s, x) => s + x.score, 0) / subjectAverages.length);
   }, [subjectAverages]);
-
-  // ── STRENGTHS & WEAK AREAS ────────────────────────────────────
-  const strengths = useMemo(() => subjectAverages.filter(s => s.score >= 75), [subjectAverages]);
-  const weakAreas = useMemo(() => subjectAverages.filter(s => s.score < 75).sort((a, b) => a.score - b.score), [subjectAverages]);
 
   // ── DECLINE DETECTION ─────────────────────────────────────────
   const decliningSubjects = useMemo(() => {
@@ -125,12 +116,6 @@ function Performance() {
         ticks: { color: '#94a3b8', callback: v => `${v}%` }
       }
     }
-  };
-
-  const getPriority = (score) => {
-    if (score < 50) return { label: 'High Priority', cls: 'priority-high' };
-    if (score < 65) return { label: 'Moderate', cls: 'priority-med' };
-    return { label: 'Monitor', cls: 'priority-low' };
   };
 
   const getStatus = (pct) => {
@@ -224,10 +209,7 @@ function Performance() {
               <span className="mp-stat-dot green"></span>
               Overall: <strong>{overallAvg}%</strong>
             </div>
-            <div className="mp-stat-pill">
-              <span className="mp-stat-dot blue"></span>
-              Attendance: <strong>{attendance?.percentage ?? 0}%</strong>
-            </div>
+
           </div>
         </div>
 
@@ -254,102 +236,11 @@ function Performance() {
             <div className="mp-chart-wrap">
               {subjectAverages.length > 0
                 ? <Bar data={barData} options={barOptions} />
-                : <p className="mp-empty">No marks recorded yet.</p>
+                : <p className="mp-empty">No data available.</p>
               }
             </div>
           </div>
 
-          {/* AI Breakdown */}
-          <div className="mp-card mp-ai-card">
-            <div className="mp-card-header">
-              <span className="mp-ai-dot">🤖</span>
-              <h3>AI Intelligence Breakdown</h3>
-            </div>
-
-            {/* Strengths */}
-            <div className="mp-section-label green">✦ Strengths</div>
-            {strengths.length > 0 ? (
-              <div className="mp-tag-row">
-                {strengths.map((s, i) => (
-                  <span key={i} className="mp-tag mp-tag-green">{s.name} · {s.score}%</span>
-                ))}
-              </div>
-            ) : <p className="mp-empty-small">No strong subjects yet.</p>}
-
-            {/* Weak Areas */}
-            <div className="mp-section-label yellow">⚡ Weak Areas & Targeted Improvements</div>
-            {weakAreas.length > 0 ? (
-              <div className="mp-weak-list">
-                {weakAreas.map((s, i) => {
-                  const p = getPriority(s.score);
-                  return (
-                    <div key={i} className="mp-weak-item">
-                      <div className="mp-weak-left">
-                        <span className="mp-weak-dot"></span>
-                        <span className="mp-weak-name">{s.name}</span>
-                        <span className="mp-weak-score">{s.score}%</span>
-                      </div>
-                      <span className={`mp-priority ${p.cls}`}>{p.label}</span>
-                    </div>
-                  );
-                })}
-              </div>
-            ) : <p className="mp-empty-small">No weak areas — great job! 🎉</p>}
-
-            {/* AI Tip */}
-            {weakAreas.length > 0 && (
-              <div className="mp-ai-tip">
-                <p className="mp-ai-tip-label">AI LEARNING PATH</p>
-                <p className="mp-ai-tip-text">
-                  Focus on <strong>{weakAreas[0]?.name}</strong> first —
-                  it has the lowest average at {weakAreas[0]?.score}%.
-                  Try reviewing past tests and asking your AI Tutor for targeted practice.
-                </p>
-              </div>
-            )}
-          </div>
-        </div>
-
-        {/* Attendance Card */}
-        <div className="mp-card mp-attendance-card">
-          <div className="mp-card-header">
-            <h3>Attendance Overview</h3>
-            <span className={`mp-att-badge ${attendance?.percentage >= 75 ? 'att-good' : 'att-warn'}`}>
-              {attendance?.percentage >= 75 ? 'Good Standing' : 'Needs Improvement'}
-            </span>
-          </div>
-          <div className="mp-att-grid">
-            <div className="mp-att-stat">
-              <h2>{attendance?.percentage ?? 0}%</h2>
-              <p>Overall Rate</p>
-            </div>
-            <div className="mp-att-stat">
-              <h2 className="green">{attendance?.present ?? 0}</h2>
-              <p>Days Present</p>
-            </div>
-            <div className="mp-att-stat">
-              <h2 className="red">{attendance?.absent ?? 0}</h2>
-              <p>Days Absent</p>
-            </div>
-            <div className="mp-att-stat">
-              <h2>{attendance?.total_sessions ?? 0}</h2>
-              <p>Total Sessions</p>
-            </div>
-          </div>
-          <div className="mp-att-bar-bg">
-            <div
-              className="mp-att-bar-fill"
-              style={{
-                width: `${attendance?.percentage ?? 0}%`,
-                background: attendance?.percentage >= 75 ? '#10b981' : attendance?.percentage >= 50 ? '#f59e0b' : '#ef4444'
-              }}
-            />
-          </div>
-          {attendance?.percentage < 75 && (
-            <p className="mp-att-warning">
-              ⚠ Your attendance is below 75%. You need {Math.ceil(((0.75 * attendance?.total_sessions) - attendance?.present))} more days to reach the required threshold.
-            </p>
-          )}
         </div>
 
         {/* Recent Test Performance */}
@@ -395,7 +286,7 @@ function Performance() {
               </tbody>
             </table>
           ) : (
-            <p className="mp-empty">No test records yet.</p>
+            <p className="mp-empty">No data available.</p>
           )}
         </div>
 

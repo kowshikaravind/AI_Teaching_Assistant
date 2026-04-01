@@ -7,11 +7,22 @@ function Login() {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
+  const [success, setSuccess] = useState('');
   const [loading, setLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
+
+  const isFormValid = username.trim().length >= 3 && password.length >= 6;
 
   const handleSignIn = async (e) => {
     e.preventDefault();
     setError('');
+    setSuccess('');
+
+    if (!isFormValid) {
+      setError('Use a valid username and a password with at least 6 characters.');
+      return;
+    }
+
     setLoading(true);
 
     try {
@@ -28,7 +39,10 @@ function Login() {
       }
 
       localStorage.setItem('teacherUser', JSON.stringify(data));
-      navigate('/studentDB');
+      setSuccess('Login successful. Redirecting...');
+      window.setTimeout(() => {
+        navigate('/studentDB');
+      }, 450);
     } catch (err) {
       console.error(err);
       setError('Server error. Please try again.');
@@ -57,34 +71,53 @@ function Login() {
         </p>
 
         <form className="login-form" onSubmit={handleSignIn}>
-          <input
-            type="text"
-            className="login-input"
-            placeholder="Username"
-            value={username}
-            onChange={(e) => setUsername(e.target.value)}
-            required
-          />
-          <input
-            type="password"
-            className="login-input"
-            placeholder="Password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            required
-          />
+          <div className="login-field-wrap">
+            <input
+              type="text"
+              className="login-input"
+              placeholder="Username"
+              value={username}
+              onChange={(e) => setUsername(e.target.value)}
+              required
+              autoComplete="username"
+              aria-invalid={Boolean(error) && username.trim().length < 3}
+            />
+          </div>
+
+          <div className="login-field-wrap">
+            <input
+              type={showPassword ? 'text' : 'password'}
+              className="login-input"
+              placeholder="Password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              required
+              autoComplete="current-password"
+              aria-invalid={Boolean(error) && password.length < 6}
+            />
+            <button
+              type="button"
+              className="password-toggle-btn"
+              onClick={() => setShowPassword((prev) => !prev)}
+              aria-label={showPassword ? 'Hide password' : 'Show password'}
+            >
+              {showPassword ? 'Hide' : 'Show'}
+            </button>
+          </div>
 
           {error && (
-            <p style={{ color: '#ef4444', fontSize: '0.85rem', marginTop: '-8px', textAlign: 'center' }}>
+            <p className="login-feedback error-text" role="alert">
               ⚠ {error}
             </p>
           )}
 
-          <div className="login-forgot-container">
-            <a href="#" className="login-forgot-link">Forgot Password?</a>
-          </div>
+          {!error && success && (
+            <p className="login-feedback success-text" role="status">
+              {success}
+            </p>
+          )}
 
-          <button type="submit" className="login-submit-btn" disabled={loading}>
+          <button type="submit" className="login-submit-btn" disabled={loading || !isFormValid}>
             {loading ? 'Verifying...' : 'Sign In'}
           </button>
         </form>
