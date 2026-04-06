@@ -11,6 +11,7 @@ ChartJS.register(CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend)
 function Performance() {
   const navigate = useNavigate();
   const [student, setStudent] = useState(null);
+  const [aiSubjects, setAiSubjects] = useState([]);
   const [loading, setLoading] = useState(true);
   const [showSettings, setShowSettings] = useState(false);
 
@@ -21,8 +22,15 @@ function Performance() {
     if (!studentId) { navigate('/', { replace: true }); return; }
     const fetchAll = async () => {
       try {
-        const sRes = await fetch(`http://127.0.0.1:8000/api/students/${studentId}/`);
-        setStudent(await sRes.json());
+        const [sRes, aiRes] = await Promise.all([
+          fetch(`http://127.0.0.1:8000/api/students/${studentId}/`),
+          fetch(`http://127.0.0.1:8000/api/students/${studentId}/ai-tutor/`),
+        ]);
+
+        const studentData = await sRes.json();
+        const aiData = aiRes.ok ? await aiRes.json() : { subjects: [] };
+        setStudent(studentData);
+        setAiSubjects(Array.isArray(aiData?.subjects) ? aiData.subjects : []);
       } catch (err) {
         console.error(err);
       } finally {
@@ -34,17 +42,11 @@ function Performance() {
 
   // ── SUBJECT AVERAGES ──────────────────────────────────────────
   const subjectAverages = useMemo(() => {
-    if (!student?.test_marks?.length) return [];
-    const by = {};
-    student.test_marks.forEach(m => {
-      if (!by[m.subject]) by[m.subject] = { total: 0, count: 0 };
-      by[m.subject].total += (m.marks_obtained / m.total_marks) * 100;
-      by[m.subject].count += 1;
-    });
-    return Object.entries(by)
-      .map(([name, d]) => ({ name, score: Math.round(d.total / d.count) }))
+    if (!aiSubjects.length) return [];
+    return aiSubjects
+      .map((s) => ({ name: s.name, score: Math.round(Number(s.avg_score || 0)) }))
       .sort((a, b) => b.score - a.score);
-  }, [student]);
+  }, [aiSubjects]);
 
   // ── OVERALL AVG ───────────────────────────────────────────────
   const overallAvg = useMemo(() => {
@@ -54,28 +56,42 @@ function Performance() {
 
   // ── DECLINE DETECTION ─────────────────────────────────────────
   const decliningSubjects = useMemo(() => {
-    if (!student?.test_marks?.length) return [];
-    const by = {};
-    [...student.test_marks]
-      .sort((a, b) => new Date(a.date_taken) - new Date(b.date_taken))
-      .forEach(m => {
-        if (!by[m.subject]) by[m.subject] = [];
-        by[m.subject].push(Math.round((m.marks_obtained / m.total_marks) * 100));
-      });
-    return Object.entries(by)
-      .filter(([, scores]) => scores.length >= 3 &&
-        scores[scores.length - 1] < scores[scores.length - 2] &&
-        scores[scores.length - 2] < scores[scores.length - 3])
-      .map(([name]) => name);
-  }, [student]);
+    if (!aiSubjects.length) return [];
+
+    return aiSubjects
+      .filter((subject) => {
+        const tests = Array.isArray(subject.tests) ? [...subject.tests] : [];
+        tests.sort((a, b) => new Date(a.test_date) - new Date(b.test_date));
+        const scores = tests
+          .map((t) => Math.round(Number(t.percentage || 0)))
+          .filter((v) => Number.isFinite(v));
+
+        return (
+          scores.length >= 3
+          && scores[scores.length - 1] < scores[scores.length - 2]
+          && scores[scores.length - 2] < scores[scores.length - 3]
+        );
+      })
+      .map((subject) => subject.name);
+  }, [aiSubjects]);
 
   // ── RECENT MARKS (last 5) ─────────────────────────────────────
   const recentMarks = useMemo(() => {
-    if (!student?.test_marks?.length) return [];
-    return [...student.test_marks]
-      .sort((a, b) => new Date(b.date_taken) - new Date(a.date_taken))
-      .slice(0, 5);
-  }, [student]);
+    if (!aiSubjects.length) return [];
+
+    return aiSubjects
+      .flatMap((subject) => (Array.isArray(subject.tests) ? subject.tests.map((t) => ({ ...t, subject: subject.name })) : []))
+      .sort((a, b) => new Date(b.test_date) - new Date(a.test_date))
+      .slice(0, 5)
+      .map((t) => ({
+        id: t.test_id,
+        test_name: t.test_name,
+        subject: t.subject,
+        date_taken: t.test_date,
+        marks_obtained: Number(t.score || 0),
+        total_marks: Number(t.total_marks || 0),
+      }));
+  }, [aiSubjects]);
 
   // ── BAR CHART DATA ────────────────────────────────────────────
   const barData = useMemo(() => ({

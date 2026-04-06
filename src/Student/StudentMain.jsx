@@ -11,6 +11,7 @@ ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, Title, T
 
 function StudentMain() {
   const [student, setStudent] = useState(null);
+  const [aiSubjects, setAiSubjects] = useState([]);
   const [loading, setLoading] = useState(true);
   const [showSettings, setShowSettings] = useState(false);
   const [lightMode, setLightMode] = useState(() => {
@@ -41,9 +42,15 @@ function StudentMain() {
   useEffect(() => {
     const fetchAll = async () => {
       try {
-        const studentRes = await fetch(`http://127.0.0.1:8000/api/students/${STUDENT_ID}/`);
+        const [studentRes, aiRes] = await Promise.all([
+          fetch(`http://127.0.0.1:8000/api/students/${STUDENT_ID}/`),
+          fetch(`http://127.0.0.1:8000/api/students/${STUDENT_ID}/ai-tutor/`),
+        ]);
+
         const studentData = await studentRes.json();
+        const aiData = aiRes.ok ? await aiRes.json() : { subjects: [] };
         setStudent(studentData);
+        setAiSubjects(Array.isArray(aiData?.subjects) ? aiData.subjects : []);
       } catch (err) {
         console.error("Failed to fetch student data:", err);
       } finally {
@@ -55,10 +62,10 @@ function StudentMain() {
 
   // ── OVERALL AVERAGE ───────────────────────────────────────────
   const overallAvg = useMemo(() => {
-    if (!student?.test_marks?.length) return 0;
-    const total = student.test_marks.reduce((sum, m) => sum + (m.marks_obtained / m.total_marks) * 100, 0);
-    return Math.round(total / student.test_marks.length);
-  }, [student]);
+    if (!aiSubjects.length) return 0;
+    const total = aiSubjects.reduce((sum, subject) => sum + Number(subject.avg_score || 0), 0);
+    return Math.round(total / aiSubjects.length);
+  }, [aiSubjects]);
 
   // ── GRADE LABEL ───────────────────────────────────────────────
   const gradeLabel = (avg) => {
@@ -71,17 +78,11 @@ function StudentMain() {
 
   // ── SUBJECT AVERAGES ──────────────────────────────────────────
   const subjectAverages = useMemo(() => {
-    if (!student?.test_marks?.length) return [];
-    const bySubject = {};
-    student.test_marks.forEach(m => {
-      if (!bySubject[m.subject]) bySubject[m.subject] = { total: 0, count: 0 };
-      bySubject[m.subject].total += (m.marks_obtained / m.total_marks) * 100;
-      bySubject[m.subject].count += 1;
-    });
-    return Object.entries(bySubject)
-      .map(([name, d]) => ({ name, score: Math.round(d.total / d.count) }))
+    if (!aiSubjects.length) return [];
+    return aiSubjects
+      .map((subject) => ({ name: subject.name, score: Math.round(Number(subject.avg_score || 0)) }))
       .sort((a, b) => b.score - a.score);
-  }, [student]);
+  }, [aiSubjects]);
 
   // ── WEAKEST SUBJECT (for AI recommendation widget) ────────────
   const weakestSubject = useMemo(() => {
@@ -91,18 +92,29 @@ function StudentMain() {
 
   // ── CHART DATA — marks sorted by date ────────────────────────
   const chartData = useMemo(() => {
-    if (!student?.test_marks?.length) return null;
-    const sorted = [...student.test_marks].sort((a, b) => new Date(a.date_taken) - new Date(b.date_taken));
+    const mergedTests = aiSubjects
+      .flatMap((subject) =>
+        (Array.isArray(subject.tests) ? subject.tests : []).map((test) => ({
+          subject: subject.name,
+          test_name: test.test_name,
+          test_date: test.test_date,
+          percentage: Number(test.percentage || 0),
+        }))
+      )
+      .sort((a, b) => new Date(a.test_date) - new Date(b.test_date));
+
+    if (!mergedTests.length) return null;
+
     return {
-      labels: sorted.map(m => `${m.subject} (${m.date_taken})`),
+      labels: mergedTests.map((m) => `${m.subject} (${m.test_date})`),
       datasets: [{
         label: 'Score %',
-        data: sorted.map(m => Math.round((m.marks_obtained / m.total_marks) * 100)),
+        data: mergedTests.map((m) => Math.round(m.percentage)),
         borderColor: '#4f46e5',
         backgroundColor: 'rgba(79, 70, 229, 0.1)',
         borderWidth: 3,
-        pointBackgroundColor: sorted.map(m => {
-          const pct = (m.marks_obtained / m.total_marks) * 100;
+        pointBackgroundColor: mergedTests.map((m) => {
+          const pct = Number(m.percentage || 0);
           return pct >= 75 ? '#10b981' : pct >= 50 ? '#f59e0b' : '#ef4444';
         }),
         pointBorderColor: '#fff',
@@ -111,7 +123,12 @@ function StudentMain() {
         fill: true,
       }]
     };
-  }, [student]);
+  }, [aiSubjects]);
+
+  const totalTestsTaken = useMemo(
+    () => aiSubjects.reduce((sum, subject) => sum + ((Array.isArray(subject.tests) ? subject.tests.length : 0)), 0),
+    [aiSubjects]
+  );
 
   const chartOptions = {
     responsive: true,
@@ -274,7 +291,7 @@ function StudentMain() {
                 </div>
               </div>
               <p className="sd-top-percent">
-                Based on {student.test_marks?.length || 0} test{student.test_marks?.length !== 1 ? 's' : ''}
+                Based on {totalTestsTaken} test{totalTestsTaken !== 1 ? 's' : ''}
               </p>
             </div>
 
@@ -349,8 +366,8 @@ function StudentMain() {
             <div>
               <h4>Tests Taken</h4>
               <p>
-                {student.test_marks?.length > 0
-                  ? `You have completed ${student.test_marks.length} test${student.test_marks.length !== 1 ? 's' : ''} across ${subjectAverages.length} subject${subjectAverages.length !== 1 ? 's' : ''}.`
+                {totalTestsTaken > 0
+                  ? `You have completed ${totalTestsTaken} test${totalTestsTaken !== 1 ? 's' : ''} across ${subjectAverages.length} subject${subjectAverages.length !== 1 ? 's' : ''}.`
                   : 'No tests recorded yet.'}
               </p>
             </div>

@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import TeacherPortalLayout from './TeacherPortalLayout.jsx';
 import SubjectSelectorWithManager from '../components/SubjectSelectorWithManager.jsx';
 import TeacherQuestionReview from './TeacherQuestionReview.jsx';
@@ -24,6 +24,7 @@ export default function TeacherUpcomingTestsPage() {
   const [reviewingTest, setReviewingTest] = useState(null);
   const [selectedTestId, setSelectedTestId] = useState(null);
   const [publishingTestId, setPublishingTestId] = useState(null);
+  const studyMaterialInputRef = useRef(null);
 
   const selectedTest = tests.find((t) => t.id === selectedTestId) || null;
 
@@ -155,6 +156,9 @@ export default function TeacherUpcomingTestsPage() {
       setSuccessMessage(`Test "${data.test_name}" scheduled successfully! Test ID: ${data.id}`);
       setFormData({ test_name: '', subject: '', test_date: '', start_time: '', end_time: '', num_questions: '' });
       setStudyMaterial(null);
+      if (studyMaterialInputRef.current) {
+        studyMaterialInputRef.current.value = '';
+      }
       
       await loadTests();
     } catch (saveError) {
@@ -337,11 +341,25 @@ export default function TeacherUpcomingTestsPage() {
             <div className="input-group">
               <label>Upload Study Material (Mandatory) *</label>
               <input 
+                ref={studyMaterialInputRef}
                 type="file" 
                 accept=".pdf,.txt,.docx"
                 required
                 onChange={(event) => setStudyMaterial(event.target.files?.[0] || null)}
               />
+              <button
+                type="button"
+                className="btn-primary tp-secondary-action"
+                style={{ marginTop: 8 }}
+                onClick={() => {
+                  setStudyMaterial(null);
+                  if (studyMaterialInputRef.current) {
+                    studyMaterialInputRef.current.value = '';
+                  }
+                }}
+              >
+                Refresh File
+              </button>
             </div>
           </div>
 
