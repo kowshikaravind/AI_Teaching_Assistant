@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { buildTeacherApiUrl } from '../utils/teacherSession.js';
 import './TeacherUpcomingTestsPage.css';
 
@@ -41,10 +41,13 @@ export default function TeacherQuestionReview({ test, onClose }) {
   const [loading, setLoading] = useState(false);
   const [publishing, setPublishing] = useState(false);
   const [savingDraft, setSavingDraft] = useState(false);
+  const [uploadingCsv, setUploadingCsv] = useState(false);
+  const [csvFile, setCsvFile] = useState(null);
   const [error, setError] = useState('');
   const [successMessage, setSuccessMessage] = useState('');
   const [isEditable, setIsEditable] = useState(true);
   const [isPublished, setIsPublished] = useState(false);
+  const csvInputRef = useRef(null);
 
   const loadExistingQuestions = useCallback(async () => {
     setLoading(true);
@@ -337,6 +340,64 @@ export default function TeacherQuestionReview({ test, onClose }) {
     }
   };
 
+  const handleCsvUpload = async () => {
+    setError('');
+    setSuccessMessage('');
+
+    if (!isEditable) {
+      setError('Question editing is locked for this test.');
+      return;
+    }
+
+    const teacherId = getTeacherId();
+    if (!teacherId) {
+      setError('Teacher session not found. Please login again.');
+      return;
+    }
+
+    if (!csvFile) {
+      setError('Please choose a CSV file first.');
+      return;
+    }
+
+    setUploadingCsv(true);
+    try {
+      const formData = new FormData();
+      formData.append('teacher_id', String(teacherId));
+      formData.append('file', csvFile);
+      formData.append('publish', 'false');
+
+      const res = await fetch(buildTeacherApiUrl(`upcoming-tests/${test.id}/upload-questions-csv/`), {
+        method: 'POST',
+        body: formData,
+      });
+      const data = await readApiPayload(res);
+
+      if (!res.ok) {
+        setError(data.error || 'Failed to upload CSV questions.');
+        return;
+      }
+
+      const rejectedCount = Number(data.rejected_count || 0);
+      setSuccessMessage(
+        rejectedCount > 0
+          ? `CSV imported. Saved ${data.saved || 0} question(s), rejected ${rejectedCount}.`
+          : `CSV imported successfully. Saved ${data.saved || 0} question(s).`
+      );
+
+      setCsvFile(null);
+      if (csvInputRef.current) {
+        csvInputRef.current.value = '';
+      }
+      await loadExistingQuestions();
+    } catch (uploadError) {
+      console.error('CSV upload failed:', uploadError);
+      setError('Server error while uploading CSV questions.');
+    } finally {
+      setUploadingCsv(false);
+    }
+  };
+
   return (
     <div className="qr-overlay">
       <div className="qr-modal">
@@ -482,6 +543,26 @@ export default function TeacherQuestionReview({ test, onClose }) {
 
           {error && <div className="qr-error-message">{error}</div>}
           {successMessage && <div className="qr-success-message">{successMessage}</div>}
+
+          <div className="qr-actions" style={{ justifyContent: 'flex-start', gap: '10px', flexWrap: 'wrap' }}>
+            <input
+              ref={csvInputRef}
+              type="file"
+              accept=".csv,text/csv"
+              disabled={!isEditable || uploadingCsv || loading}
+              onChange={(e) => setCsvFile(e.target.files?.[0] || null)}
+              className="qr-input"
+              style={{ maxWidth: '320px', padding: '8px' }}
+            />
+            <button
+              onClick={handleCsvUpload}
+              disabled={!isEditable || uploadingCsv || loading || !csvFile}
+              className="qr-btn-secondary"
+              title="Upload CSV with columns: question_text, option_a, option_b, option_c, option_d, correct_answer"
+            >
+              {uploadingCsv ? 'Uploading CSV...' : 'Upload CSV Questions'}
+            </button>
+          </div>
 
           <div className="qr-actions">
               <button onClick={addQuestion} disabled={!isEditable} className="qr-btn-secondary">+ Add Question</button>
