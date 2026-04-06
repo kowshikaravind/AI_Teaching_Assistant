@@ -1,6 +1,7 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import StudentTestDetailModal from '../components/StudentTestDetailModal.jsx';
+import StudentTestReviewModal from '../components/StudentTestReviewModal.jsx';
 import './Student.css';
 
 function Test() {
@@ -12,6 +13,7 @@ function Test() {
   const [activeTestTab, setActiveTestTab] = useState('scheduled');
   const [lightMode, setLightMode] = useState(false);
   const [selectedTest, setSelectedTest] = useState(null);
+  const [selectedReviewTest, setSelectedReviewTest] = useState(null);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
   const studentUser = JSON.parse(localStorage.getItem('studentUser') || '{}');
@@ -363,6 +365,14 @@ function Test() {
                               Marks not published yet.
                             </p>
                           )}
+
+                          <button
+                            type="button"
+                            className="st-review-btn"
+                            onClick={() => setSelectedReviewTest(t)}
+                          >
+                            Review Test
+                          </button>
                         </div>
                       );
                     })}
@@ -380,6 +390,14 @@ function Test() {
           studentId={studentId}
           onClose={() => setSelectedTest(null)}
           onTestStarted={refreshTests}
+        />
+      )}
+
+      {selectedReviewTest && (
+        <StudentTestReviewModal
+          test={selectedReviewTest}
+          studentId={studentId}
+          onClose={() => setSelectedReviewTest(null)}
         />
       )}
     </div>

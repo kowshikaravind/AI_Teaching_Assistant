@@ -267,6 +267,29 @@
   letter-spacing: 0.05em;
 }
 
+.sd-profile-btn {
+  width: 100%;
+  background: #eef2ff;
+  border: 1px solid #c7d2fe;
+  border-radius: 8px;
+  padding: 9px 12px;
+  cursor: pointer;
+  color: #312e81;
+  font-size: 0.85rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  font-weight: 600;
+  transition: all 0.2s;
+  margin-bottom: 8px;
+}
+
+.sd-profile-btn:hover {
+  background: #e0e7ff;
+  border-color: #a5b4fc;
+}
+
 .sd-logout-btn {
   width: 100%;
   background: #fff1f2;
@@ -1498,6 +1521,12 @@ input:checked + .slider:before { transform: translateX(20px); }
   color: #64748b;
 }
 
+.sd-layout-light .sd-profile-btn {
+  background: #eef2ff;
+  border: 1px solid #c7d2fe;
+  color: #3730a3;
+}
+
 .sd-layout-light .sd-logout-btn {
   background: #fef2f2;
   border: 1px solid #fecdd3;
@@ -2436,6 +2465,36 @@ input:checked + .slider:before { transform: translateX(20px); }
   font-size: 0.95rem;
   color: #e9ecff;
   font-weight: 700;
+}
+
+.ai-analysis-card-prominent {
+  border-color: rgba(147, 112, 219, 0.4);
+  background: linear-gradient(180deg, rgba(55, 40, 100, 0.9), rgba(40, 28, 80, 0.95));
+  margin-bottom: 20px;
+}
+
+.ai-analysis-card-prominent h3 {
+  color: #c9a8ff;
+}
+
+.comprehensive-analysis-text {
+  color: #d2d8ff;
+  font-size: 0.9rem;
+  line-height: 1.6;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.analysis-line {
+  padding: 8px;
+  white-space: pre-wrap;
+  word-wrap: break-word;
+}
+
+.analysis-line:first-child {
+  font-weight: 600;
+  color: #e9ecff;
 }
 
 .analysis-content {

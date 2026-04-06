@@ -7,6 +7,7 @@ export default function StudentTestDetailModal({ test, studentId, onClose, onTes
   const [testDetails, setTestDetails] = useState(null);
   const [showTest, setShowTest] = useState(false);
   const [canStart, setCanStart] = useState(false);
+  const [serverCanSubmit, setServerCanSubmit] = useState(false);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(true);
 
@@ -14,8 +15,13 @@ export default function StudentTestDetailModal({ test, studentId, onClose, onTes
     try {
       const res = await fetch(buildStudentApiUrl(`upcoming-tests/${test.id}/details/`));
       const data = await res.json();
+      if (!res.ok) {
+        throw new Error(data.error || 'Failed to load test details');
+      }
       setTestDetails(data);
-      setCanStart(data.student_can_submit);
+      const allowed = Boolean(data.student_can_submit);
+      setServerCanSubmit(allowed);
+      setCanStart(allowed);
       setError('');
     } catch (err) {
       setError('Failed to load test details');
@@ -31,9 +37,9 @@ export default function StudentTestDetailModal({ test, studentId, onClose, onTes
       const startTime = new Date(testDetails.start_time);
       const endTime = new Date(testDetails.end_time);
 
-      setCanStart(now >= startTime && now < endTime);
+      setCanStart(serverCanSubmit && now >= startTime && now < endTime);
     }
-  }, [testDetails]);
+  }, [serverCanSubmit, testDetails]);
 
   useEffect(() => {
     loadTestDetails();

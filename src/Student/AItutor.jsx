@@ -104,6 +104,8 @@ function AItutor() {
 			activeTestReview?.behavior_patterns?.length > 0
 				? activeTestReview.behavior_patterns
 				: activeSubject.behavior_patterns || [];
+		const activeStrengths =
+			activeTestReview?.strengths?.length > 0 ? activeTestReview.strengths : activeSubject.strengths || [];
 
 		const userMessage = {
 			role: 'user',
@@ -132,7 +134,8 @@ function AItutor() {
 						? `We are focusing on ${activeTestReview.test_name} from ${activeTestReview.test_date}. `
 						: '') +
 					`Their conceptual mistakes include: ${activeConceptualMistakes.join(', ')}. ` +
-					`Their test behavior patterns include: ${activeBehaviorPatterns.join(', ')}.`,
+					`Their test behavior patterns include: ${activeBehaviorPatterns.join(', ')}. ` +
+					`Their strengths include: ${activeStrengths.join(', ')}.`,
 			],
 		};
 
@@ -150,11 +153,17 @@ function AItutor() {
 						test_date: activeTestReview?.test_date || null,
 						conceptual_mistakes: activeConceptualMistakes,
 						behavior_patterns: activeBehaviorPatterns,
+							strengths: activeStrengths,
+							mastery_summary: activeTestReview?.mastery_summary || activeSubject.mastery_summary || null,
+						comprehensive_analysis: activeTestReview?.comprehensive_analysis || [],
 					},
 				}),
 			});
 
 			const data = await res.json();
+			if (!res.ok) {
+				throw new Error(data.error || 'I could not generate a response. Please try again.');
+			}
 			setMessages((prev) => [
 				...prev,
 				{
@@ -169,7 +178,7 @@ function AItutor() {
 				...prev,
 				{
 					role: 'ai',
-					text: 'Something went wrong. Please try again.',
+					text: err.message || 'Something went wrong. Please try again.',
 					time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
 				},
 			]);
@@ -343,7 +352,7 @@ function AItutor() {
 											<span>{test.percentage}%</span>
 										</div>
 										<p>{test.test_date}</p>
-										<small>{test.conceptual_mistakes?.[0] || test.behavior_patterns?.[0] || 'No review available.'}</small>
+										<small>{test.mastery_summary || test.conceptual_mistakes?.[0] || test.behavior_patterns?.[0] || 'No review available.'}</small>
 									</button>
 								))}
 							</div>
@@ -389,6 +398,21 @@ function AItutor() {
 										</div>
 									) : (
 										<p className="no-data">Comparison data is not available yet.</p>
+									)}
+								</div>
+							</div>
+
+							<div className="ai-analysis-card">
+								<h3>Strengths and Mastery{activeTestReview ? ` - ${activeTestReview.test_name}` : ''}</h3>
+								<div className="analysis-content">
+									{activeTestReview?.strengths?.length > 0 ? (
+										<ul className="analysis-list">
+											{activeTestReview.strengths.map((strength, idx) => (
+												<li key={idx}>{strength}</li>
+											))}
+										</ul>
+									) : (
+										<p className="no-data">{activeTestReview?.mastery_summary || 'No strong strengths detected yet.'}</p>
 									)}
 								</div>
 							</div>

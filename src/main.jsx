@@ -1,7 +1,6 @@
 import { createRoot } from 'react-dom/client'
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import AddStudent from './components/addStudent.jsx';
-import AddTestMark from './components/AddMarkForm.jsx';
 import './index.css'
 import App from './App.jsx'
 import './App.css'
@@ -24,7 +23,6 @@ import TeacherUpcomingTestsPage from './teacherPortal/TeacherUpcomingTestsPage.j
 import TeacherAIInsightsPage from './teacherPortal/TeacherAIInsightsPage.jsx';
 import TeacherNotificationsPage from './teacherPortal/TeacherNotificationsPage.jsx';
 import TeacherStudentDetailsPage from './teacherPortal/TeacherStudentDetailsPage.jsx';
-import TeacherStudentForm from './teacherPortal/TeacherStudentForm.jsx';
 import { applyAppSettings, loadAppSettings } from './utils/appSettings.js';
 import { RequireTeacherAuth, RequireAdminAuth } from './components/RouteGuards.jsx';
 
@@ -47,14 +45,11 @@ createRoot(document.getElementById('root')).render(
 
             <Route path="/studentDB" element={<RequireTeacherAuth><App /></RequireTeacherAuth>} />
             <Route path="/add-student" element={<RequireTeacherAuth><AddStudent /></RequireTeacherAuth>} />
-            <Route path="/add-test-mark/:id" element={<RequireTeacherAuth><AddTestMark /></RequireTeacherAuth>} />
 
             {/* Teacher Portal Routes */}
             <Route path="/teacher/dashboard" element={<RequireTeacherAuth><TeacherDashboard /></RequireTeacherAuth>} />
             <Route path="/teacher/students" element={<RequireTeacherAuth><TeacherStudentsPage /></RequireTeacherAuth>} />
             <Route path="/teacher/students/:id" element={<RequireTeacherAuth><TeacherStudentDetailsPage /></RequireTeacherAuth>} />
-            <Route path="/teacher/students/form/new" element={<RequireTeacherAuth><TeacherStudentForm /></RequireTeacherAuth>} />
-            <Route path="/teacher/students/form/:id" element={<RequireTeacherAuth><TeacherStudentForm /></RequireTeacherAuth>} />
             <Route path="/teacher/tests" element={<RequireTeacherAuth><TeacherUpcomingTestsPage /></RequireTeacherAuth>} />
             <Route path="/teacher/ai" element={<RequireTeacherAuth><TeacherAIInsightsPage /></RequireTeacherAuth>} />
             <Route path="/teacher/alerts" element={<RequireTeacherAuth><TeacherNotificationsPage /></RequireTeacherAuth>} />

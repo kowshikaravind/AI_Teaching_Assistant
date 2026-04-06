@@ -64,7 +64,7 @@ export default function TeacherStudentsPage() {
       actions={(
         <div className="tp-header-actions">
           <SubjectSelectorWithManager mode="manage-only" triggerText="📚 Manage Subjects" />
-          <button className="btn-primary" onClick={() => navigate('/teacher/students/form/new')}>+ Add Student</button>
+          <button className="btn-primary" onClick={() => navigate('/add-student', { state: { returnTo: '/teacher/students' } })}>+ Add Student</button>
         </div>
       )}
     >
@@ -111,7 +111,12 @@ export default function TeacherStudentsPage() {
                     <td className="tp-table-action-cell">
                       <div className="tp-tests-actions-wrap">
                         <button className="btn-primary" onClick={() => navigate(`/teacher/students/${student.id}`)}>View</button>
-                        <button className="btn-primary" onClick={() => navigate(`/teacher/students/form/${student.id}`)}>Edit</button>
+                        <button
+                          className="btn-primary"
+                          onClick={() => navigate('/add-student', { state: { editMode: true, studentData: student, returnTo: '/teacher/students' } })}
+                        >
+                          Edit
+                        </button>
                         <button
                           type="button"
                           onClick={() => handleDelete(student)}

@@ -12,7 +12,7 @@ const suggestions = [
 export default function TeacherAIInsightsPage() { 
   const { assignedClass } = getTeacherSessionProfile();
   const [studentCount, setStudentCount] = useState(0);
-  const [messages, setMessages] = useState([{ role: 'model', text: 'hi what can i help u with' }]);
+  const [messages, setMessages] = useState([{ role: 'model', text: 'Hi, what can I help you with for this class?' }]);
   const [input, setInput] = useState('');
   const [loading, setLoading] = useState(true);
   const [thinking, setThinking] = useState(false);
@@ -61,10 +61,13 @@ export default function TeacherAIInsightsPage() {
         body: JSON.stringify(withTeacherScope({ message: text, history })),
       });
       const data = await res.json();
-      setMessages((existing) => [...existing, { role: 'model', text: data.reply || data.error || 'No response received.' }]);
+      if (!res.ok) {
+        throw new Error(data.error || 'Unable to get AI insights right now.');
+      }
+      setMessages((existing) => [...existing, { role: 'model', text: data.reply || 'No response received.' }]);
     } catch (error) {
       console.error('Failed to call class AI chat:', error);
-      setMessages((existing) => [...existing, { role: 'model', text: 'Something went wrong while loading AI insights.' }]);
+      setMessages((existing) => [...existing, { role: 'model', text: error.message || 'Something went wrong while loading AI insights.' }]);
     } finally {
       setThinking(false);
     }

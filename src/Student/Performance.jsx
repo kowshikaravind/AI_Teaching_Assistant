@@ -128,6 +128,10 @@ function Performance() {
     <div className="mp-loading">Loading performance data...</div>
   );
 
+  if (!student) return (
+    <div className="mp-loading">Unable to load performance data right now.</div>
+  );
+
   return (
     <div className="mp-layout">
 

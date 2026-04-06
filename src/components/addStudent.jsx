@@ -12,6 +12,7 @@ function AddStudent() {
   const adminUser = JSON.parse(localStorage.getItem('adminUser') || '{}');
   const hasTeacherAccess = teacherUser?.role === 'teacher';
   const hasAdminAccess = adminUser?.role === 'admin';
+  const isTeacherOnlyView = hasTeacherAccess && !hasAdminAccess;
   
   const isEditMode = location.state?.editMode || false;
   const existingData = location.state?.studentData || null;
@@ -67,6 +68,10 @@ function AddStudent() {
     }
 
     const fetchClasses = async () => {
+      if (isTeacherOnlyView) {
+        setExistingClasses([]);
+        return;
+      }
       try {
         const res = await fetch("http://127.0.0.1:8000/api/students/");
         const data = await res.json();
@@ -77,7 +82,7 @@ function AddStudent() {
       }
     };
     fetchClasses();
-  }, [hasTeacherAccess, hasAdminAccess, navigate]);
+  }, [hasTeacherAccess, hasAdminAccess, isTeacherOnlyView, navigate]);
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -104,6 +109,11 @@ function AddStudent() {
       return;
     }
     
+    const payload = {
+      ...formData,
+      class_name: isTeacherOnlyView ? assignedClass : formData.class_name,
+    };
+
     const url = isEditMode
       ? `http://127.0.0.1:8000/api/students/${existingData.id}/`
       : "http://127.0.0.1:8000/api/students/";
@@ -113,7 +123,7 @@ function AddStudent() {
       const res = await fetch(url, {
         method,
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(formData),
+        body: JSON.stringify(payload),
       });
 
       if (res.ok) {
@@ -239,7 +249,7 @@ function AddStudent() {
                   <option value="">Select Gender</option>
                   <option value="Male">Male</option>
                   <option value="Female">Female</option>
-                  <option value="Other">Other</option>
+                  <option value="Others">Others</option>
                 </select>
               </div>
             </div>
@@ -259,46 +269,57 @@ function AddStudent() {
             <div className="input-group" style={{ marginTop: '20px' }}>
               <label>Assigned Class</label>
 
-              {/* Always show the dropdown */}
-              <select
-                onChange={handleClassSelect}
-                value={isNewClass ? "__new__" : formData.class_name}
-                required={!isNewClass}
-                style={{ marginBottom: isNewClass ? 10 : 0 }}
-              >
-                <option value="">Select a class</option>
-                {existingClasses.map(c => (
-                  <option key={c} value={c}>{c}</option>
-                ))}
-                <option value="__new__">➕ Add New Class</option>
-              </select>
-
-              {/* Only show text input when "Add New Class" is selected */}
-              {isNewClass && (
-                <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
-                  <input
-                    type="text"
-                    name="class_name"
-                    placeholder="DEPARTMENT - YEAR (e.g. Computer Science - 2025)"
-                    value={formData.class_name}
-                    onChange={handleChange}
-                    required
-                    autoFocus
-                    style={{ flex: 1 }}
-                  />
-                  {/* Back to dropdown */}
-                  <button
-                    type="button"
-                    onClick={() => { setIsNewClass(false); setFormData({ ...formData, class_name: "" }); }}
-                    style={{
-                      padding: '8px 12px', background: '#f1f5f9',
-                      border: '1px solid #e2e8f0', borderRadius: 8,
-                      fontSize: 12, color: '#64748b', cursor: 'pointer', whiteSpace: 'nowrap'
-                    }}
+              {isTeacherOnlyView ? (
+                <input
+                  type="text"
+                  value={assignedClass || formData.class_name}
+                  readOnly
+                  style={{ marginBottom: 0 }}
+                />
+              ) : (
+                <>
+                  {/* Always show the dropdown */}
+                  <select
+                    onChange={handleClassSelect}
+                    value={isNewClass ? "__new__" : formData.class_name}
+                    required={!isNewClass}
+                    style={{ marginBottom: isNewClass ? 10 : 0 }}
                   >
-                    ← Back
-                  </button>
-                </div>
+                    <option value="">Select a class</option>
+                    {existingClasses.map(c => (
+                      <option key={c} value={c}>{c}</option>
+                    ))}
+                    <option value="__new__">➕ Add New Class</option>
+                  </select>
+
+                  {/* Only show text input when "Add New Class" is selected */}
+                  {isNewClass && (
+                    <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+                      <input
+                        type="text"
+                        name="class_name"
+                        placeholder="DEPARTMENT - YEAR (e.g. Computer Science - 2025)"
+                        value={formData.class_name}
+                        onChange={handleChange}
+                        required
+                        autoFocus
+                        style={{ flex: 1 }}
+                      />
+                      {/* Back to dropdown */}
+                      <button
+                        type="button"
+                        onClick={() => { setIsNewClass(false); setFormData({ ...formData, class_name: "" }); }}
+                        style={{
+                          padding: '8px 12px', background: '#f1f5f9',
+                          border: '1px solid #e2e8f0', borderRadius: 8,
+                          fontSize: 12, color: '#64748b', cursor: 'pointer', whiteSpace: 'nowrap'
+                        }}
+                      >
+                        ← Back
+                      </button>
+                    </div>
+                  )}
+                </>
               )}
             </div>
 
@@ -346,7 +367,7 @@ function AddStudent() {
                 <p style={{fontSize: "1.2rem", fontWeight: "600", marginBottom: "20px"}}>Are you sure you want to cancel?</p>
                 <p style={{color: "#64748b", marginBottom: "30px"}}>Any unsaved changes will be lost.</p>
                 <div className='confirm-cancel-buttons'>
-                  <button className='cancel-yes-btn' onClick={() => navigate("/studentDB")}>Yes, Cancel</button>
+                  <button className='cancel-yes-btn' onClick={() => navigate(returnTo)}>Yes, Cancel</button>
                   <button className='cancel-no-btn' onClick={() => setConfirmCancel(false)}>No, Continue Editing</button>
                 </div>
               </div>

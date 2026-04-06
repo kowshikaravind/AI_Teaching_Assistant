@@ -1,0 +1,155 @@
+.st-review-modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(2, 6, 23, 0.72);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  z-index: 1200;
+}
+
+.st-review-modal {
+  width: min(980px, 100%);
+  max-height: 90vh;
+  overflow: auto;
+  border-radius: 14px;
+  border: 1px solid rgba(148, 163, 184, 0.28);
+  background: #0f172a;
+  color: #e2e8f0;
+  padding: 18px;
+}
+
+.st-review-modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 14px;
+}
+
+.st-review-modal-header h3 {
+  margin: 0;
+  font-size: 1.1rem;
+}
+
+.st-review-modal-header p {
+  margin: 4px 0 0;
+  color: #94a3b8;
+  font-size: 0.9rem;
+}
+
+.st-review-close-btn {
+  border: 1px solid #334155;
+  background: #1e293b;
+  color: #e2e8f0;
+  border-radius: 8px;
+  padding: 6px 10px;
+  cursor: pointer;
+}
+
+.st-review-loading,
+.st-review-error {
+  margin: 12px 0;
+  color: #cbd5e1;
+}
+
+.st-review-error {
+  color: #f87171;
+}
+
+.st-review-summary-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+  gap: 10px;
+  margin-bottom: 14px;
+}
+
+.st-review-summary-grid div {
+  border: 1px solid rgba(148, 163, 184, 0.25);
+  background: #111b33;
+  border-radius: 10px;
+  padding: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.st-review-summary-grid span {
+  color: #93c5fd;
+  font-size: 0.78rem;
+}
+
+.st-review-summary-grid strong {
+  font-size: 1rem;
+  color: #f8fafc;
+}
+
+.st-review-question-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.st-review-question {
+  border-radius: 10px;
+  border: 1px solid rgba(148, 163, 184, 0.24);
+  background: #111827;
+  padding: 12px;
+}
+
+.st-review-question.correct {
+  border-color: rgba(16, 185, 129, 0.45);
+}
+
+.st-review-question.incorrect {
+  border-color: rgba(239, 68, 68, 0.45);
+}
+
+.st-review-question.unattempted {
+  border-color: rgba(234, 179, 8, 0.45);
+}
+
+.st-review-question-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin-bottom: 8px;
+}
+
+.st-review-status {
+  border-radius: 999px;
+  padding: 3px 9px;
+  font-size: 0.75rem;
+  font-weight: 700;
+}
+
+.st-review-status.correct {
+  background: rgba(16, 185, 129, 0.16);
+  color: #86efac;
+}
+
+.st-review-status.incorrect {
+  background: rgba(239, 68, 68, 0.16);
+  color: #fca5a5;
+}
+
+.st-review-status.unattempted {
+  background: rgba(234, 179, 8, 0.16);
+  color: #fde68a;
+}
+
+.st-review-question-text {
+  margin: 0 0 8px;
+  color: #dbeafe;
+}
+
+.st-review-question-meta,
+.st-review-answers {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 6px 10px;
+  font-size: 0.85rem;
+  color: #cbd5e1;
+}

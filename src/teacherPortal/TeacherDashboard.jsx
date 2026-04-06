@@ -168,7 +168,7 @@ export default function TeacherDashboard() {
                 <button type="button" className="edudash-settings-btn" onClick={() => navigate('/teacher/students')}>
                   ⚙ Course Settings
                 </button>
-                <button type="button" className="edudash-quick-btn" onClick={() => navigate('/teacher/students/form/new')}>
+                <button type="button" className="edudash-quick-btn" onClick={() => navigate('/add-student', { state: { returnTo: '/teacher/students' } })}>
                   + Quick Action
                 </button>
               </div>

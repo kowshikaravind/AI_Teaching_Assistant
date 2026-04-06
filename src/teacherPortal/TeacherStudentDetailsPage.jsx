@@ -127,7 +127,12 @@ export default function TeacherStudentDetailsPage() {
                 <div><strong>Average Score:</strong> {average}%</div>
               </div>
               <div className="tp-detail-actions">
-                <button className="btn-primary" onClick={() => navigate(`/teacher/students/form/${student.id}`)}>Edit Student</button>
+                <button
+                  className="btn-primary"
+                  onClick={() => navigate('/add-student', { state: { editMode: true, studentData: student, returnTo: '/teacher/students' } })}
+                >
+                  Edit Student
+                </button>
               </div>
             </div>
 
