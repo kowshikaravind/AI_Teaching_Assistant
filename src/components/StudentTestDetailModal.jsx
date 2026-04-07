@@ -112,7 +112,7 @@ export default function StudentTestDetailModal({ test, studentId, onClose, onTes
   const materialUrl = testInfo.study_material_url
     ? (String(testInfo.study_material_url).startsWith('http')
       ? testInfo.study_material_url
-      : backendUrl(testInfo.study_material_url)
+      : backendUrl(testInfo.study_material_url))
     : null;
 
   return (
