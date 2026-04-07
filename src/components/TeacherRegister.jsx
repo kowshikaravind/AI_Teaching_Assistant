@@ -87,13 +87,29 @@ function TeacherRegister() {
         body: JSON.stringify(formData),
       });
 
-      const data = await res.json();
+      const contentType = res.headers.get('content-type') || '';
+      let data = null;
+      let rawText = '';
+
+      if (contentType.includes('application/json')) {
+        data = await res.json();
+      } else {
+        rawText = await res.text();
+      }
+
       if (!res.ok) {
-        setError(data.error || 'Unable to submit request.');
+        const backendMessage = data?.error || data?.message;
+        const htmlError = rawText && rawText.trim().startsWith('<');
+        setError(
+          backendMessage ||
+          (htmlError
+            ? `Server error (${res.status}). Check Django terminal logs for traceback.`
+            : `Request failed (${res.status}).`)
+        );
         return;
       }
 
-      setSuccess(data.message || 'Request submitted. Waiting for admin approval.');
+      setSuccess(data?.message || 'Request submitted. Waiting for admin approval.');
       setFormData({ teacher_name: '', username: '', password: '', assigned_class: '' });
     } catch (err) {
       console.error(err);
