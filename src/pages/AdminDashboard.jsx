@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import '../components/Login.css';
+import { apiUrl } from '../utils/backendUrls.js';
 
 function AdminDashboard() {
   const navigate = useNavigate();
@@ -21,8 +22,8 @@ function AdminDashboard() {
     try {
       setError('');
       const [pendingRes, approvedRes] = await Promise.all([
-        fetch('http://127.0.0.1:8000/api/admin/teachers/pending/'),
-        fetch('http://127.0.0.1:8000/api/admin/teachers/approved/'),
+        fetch(apiUrl('/admin/teachers/pending/')),
+        fetch(apiUrl('/admin/teachers/approved/')),
       ]);
 
       const pendingData = await pendingRes.json();
@@ -54,7 +55,7 @@ function AdminDashboard() {
     setMessage('');
     setError('');
     try {
-      const res = await fetch(`http://127.0.0.1:8000/api/admin/teachers/${teacherId}/approve/`, { method: 'POST' });
+      const res = await fetch(apiUrl(`/admin/teachers/${teacherId}/approve/`), { method: 'POST' });
       const data = await res.json();
       if (!res.ok) {
         setError(data.error || 'Unable to approve teacher.');
@@ -75,7 +76,7 @@ function AdminDashboard() {
     setMessage('');
     setError('');
     try {
-      const res = await fetch(`http://127.0.0.1:8000/api/admin/teachers/${teacherId}/reject/`, { method: 'POST' });
+      const res = await fetch(apiUrl(`/admin/teachers/${teacherId}/reject/`), { method: 'POST' });
       const data = await res.json();
       if (!res.ok) {
         setError(data.error || 'Unable to reject teacher.');
@@ -96,7 +97,7 @@ function AdminDashboard() {
     setMessage('');
     setError('');
     try {
-      const res = await fetch(`http://127.0.0.1:8000/api/admin/teachers/${teacherId}/revoke/`, { method: 'DELETE' });
+      const res = await fetch(apiUrl(`/admin/teachers/${teacherId}/revoke/`), { method: 'DELETE' });
       const data = await res.json();
       if (!res.ok) {
         setError(data.error || 'Unable to remove teacher access.');
@@ -124,7 +125,7 @@ function AdminDashboard() {
     setBusyId('admin-credentials');
 
     try {
-      const res = await fetch('http://127.0.0.1:8000/api/admin-change-credentials/', {
+      const res = await fetch(apiUrl('/admin-change-credentials/'), {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(adminForm),

@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import './Login.css';
+import { apiUrl } from '../utils/backendUrls.js';
 
 function AdminLogin() {
   const navigate = useNavigate();
@@ -27,7 +28,7 @@ function AdminLogin() {
     setLoading(true);
 
     try {
-      const res = await fetch('http://127.0.0.1:8000/api/admin-login/', {
+      const res = await fetch(apiUrl('/admin-login/'), {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ username, password }),

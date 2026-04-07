@@ -5,6 +5,7 @@ import {
   Chart as ChartJS, CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend
 } from 'chart.js';
 import './Student.css';
+import { apiUrl } from '../utils/backendUrls.js';
 
 ChartJS.register(CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend);
 
@@ -23,8 +24,8 @@ function Performance() {
     const fetchAll = async () => {
       try {
         const [sRes, aiRes] = await Promise.all([
-          fetch(`http://127.0.0.1:8000/api/students/${studentId}/`),
-          fetch(`http://127.0.0.1:8000/api/students/${studentId}/ai-tutor/`),
+          fetch(apiUrl(`/students/${studentId}/`)),
+          fetch(apiUrl(`/students/${studentId}/ai-tutor/`)),
         ]);
 
         const studentData = await sRes.json();

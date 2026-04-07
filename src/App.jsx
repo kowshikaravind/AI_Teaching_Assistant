@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback, useMemo } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import './App.css';
 import { getTeacherSessionProfile } from './utils/teacherSession.js';
+import { apiUrl } from './utils/backendUrls.js';
 
 function App() {
   const [students, setStudents] = useState([]);
@@ -45,7 +46,7 @@ function App() {
     setError('');
     setLoading(true);
     try {
-      const res = await fetch("http://127.0.0.1:8000/api/students/");
+      const res = await fetch(apiUrl('/students/'));
       if (!res.ok) {
         throw new Error('Unable to load students right now.');
       }
@@ -118,7 +119,7 @@ function App() {
       setDeletingStudentId(studentId);
       setError('');
       try {
-        const res = await fetch(`http://127.0.0.1:8000/api/students/${studentId}/`, {
+        const res = await fetch(apiUrl(`/students/${studentId}/`), {
           method: "DELETE",
         });
 

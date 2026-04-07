@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import './Login.css';
+import { apiUrl } from '../utils/backendUrls.js';
 
 function Login() {
   const navigate = useNavigate();
@@ -26,7 +27,7 @@ function Login() {
     setLoading(true);
 
     try {
-      const res = await fetch('http://127.0.0.1:8000/api/teacher-login/', {
+      const res = await fetch(apiUrl('/teacher-login/'), {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ username, password }),

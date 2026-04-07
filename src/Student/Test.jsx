@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import StudentTestDetailModal from '../components/StudentTestDetailModal.jsx';
 import StudentTestReviewModal from '../components/StudentTestReviewModal.jsx';
 import './Student.css';
+import { apiUrl } from '../utils/backendUrls.js';
 
 function Test() {
   const navigate = useNavigate();
@@ -44,8 +45,8 @@ function Test() {
     const fetchAll = async () => {
       try {
         const [sRes, tRes] = await Promise.all([
-          fetch(`http://127.0.0.1:8000/api/students/${studentId}/`),
-          fetch(`http://127.0.0.1:8000/api/upcoming-tests/?student_id=${studentId}`),
+          fetch(apiUrl(`/students/${studentId}/`)),
+          fetch(apiUrl(`/upcoming-tests/?student_id=${studentId}`)),
         ]);
 
         const studentText = await sRes.text();
@@ -74,8 +75,8 @@ function Test() {
     if (!studentId) return;
     try {
       const [sRes, tRes] = await Promise.all([
-        fetch(`http://127.0.0.1:8000/api/students/${studentId}/`),
-        fetch(`http://127.0.0.1:8000/api/upcoming-tests/?student_id=${studentId}`),
+        fetch(apiUrl(`/students/${studentId}/`)),
+        fetch(apiUrl(`/upcoming-tests/?student_id=${studentId}`)),
       ]);
       const studentText = await sRes.text();
       const testsText = await tRes.text();

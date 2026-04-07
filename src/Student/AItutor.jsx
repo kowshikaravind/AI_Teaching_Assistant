@@ -1,6 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import './Student.css';
+import { apiUrl } from '../utils/backendUrls.js';
 
 const STARTER_PROMPTS = [
 	'Help me understand my mistakes in this test',
@@ -63,8 +64,8 @@ function AItutor() {
 		const fetchData = async () => {
 			try {
 				const [studentRes, aiTutorRes] = await Promise.all([
-					fetch(`http://127.0.0.1:8000/api/students/${studentId}/`),
-					fetch(`http://127.0.0.1:8000/api/students/${studentId}/ai-tutor/`),
+					fetch(apiUrl(`/students/${studentId}/`)),
+					fetch(apiUrl(`/students/${studentId}/ai-tutor/`)),
 				]);
 
 				if (!studentRes.ok) {
@@ -140,7 +141,7 @@ function AItutor() {
 		};
 
 		try {
-			const res = await fetch(`http://127.0.0.1:8000/api/students/${studentId}/chat/`, {
+			const res = await fetch(apiUrl(`/students/${studentId}/chat/`), {
 				method: 'POST',
 				headers: { 'Content-Type': 'application/json' },
 				body: JSON.stringify({

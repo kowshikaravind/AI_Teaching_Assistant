@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import './Login.css';
+import { apiUrl } from '../utils/backendUrls.js';
 
 function TeacherRegister() {
   const navigate = useNavigate();
@@ -23,7 +24,7 @@ function TeacherRegister() {
 
     const fetchClassNames = async () => {
       try {
-        const res = await fetch('http://127.0.0.1:8000/api/students/');
+        const res = await fetch(apiUrl('/students/'));
         
         if (!res.ok) {
           throw new Error(`API returned ${res.status}`);
@@ -81,7 +82,7 @@ function TeacherRegister() {
     setLoading(true);
 
     try {
-      const res = await fetch('http://127.0.0.1:8000/api/teacher-register/', {
+      const res = await fetch(apiUrl('/teacher-register/'), {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(formData),

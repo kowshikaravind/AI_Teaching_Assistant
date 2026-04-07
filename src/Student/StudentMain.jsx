@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { Line } from 'react-chartjs-2';
 import { useParams , useNavigate} from 'react-router-dom';
+import { apiUrl } from '../utils/backendUrls.js';
 
 import {
   Chart as ChartJS, CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Filler
@@ -43,8 +44,8 @@ function StudentMain() {
     const fetchAll = async () => {
       try {
         const [studentRes, aiRes] = await Promise.all([
-          fetch(`http://127.0.0.1:8000/api/students/${STUDENT_ID}/`),
-          fetch(`http://127.0.0.1:8000/api/students/${STUDENT_ID}/ai-tutor/`),
+          fetch(apiUrl(`/students/${STUDENT_ID}/`)),
+          fetch(apiUrl(`/students/${STUDENT_ID}/ai-tutor/`)),
         ]);
 
         const studentData = await studentRes.json();

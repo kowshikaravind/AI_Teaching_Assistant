@@ -1,4 +1,4 @@
-const BASE_URL = 'http://127.0.0.1:8000/api';
+import { apiUrl } from './backendUrls.js';
 
 function getAuthToken() {
   // Check teacher, student, or admin
@@ -10,7 +10,7 @@ function getAuthToken() {
 }
 
 export async function apiFetch(endpoint, options = {}) {
-  const url = endpoint.startsWith('http') ? endpoint : `${BASE_URL}${endpoint}`;
+  const url = endpoint.startsWith('http') ? endpoint : apiUrl(endpoint);
   
   const headers = {
     'Content-Type': 'application/json',

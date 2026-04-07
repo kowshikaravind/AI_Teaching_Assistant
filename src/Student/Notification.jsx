@@ -1,6 +1,7 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import './Student.css';
+import { apiUrl } from '../utils/backendUrls.js';
 
 function Notification() {
 	const navigate = useNavigate();
@@ -29,8 +30,8 @@ function Notification() {
 			try {
 				setError('');
 				const [studentRes, notificationRes] = await Promise.all([
-					fetch(`http://127.0.0.1:8000/api/students/${studentId}/`),
-					fetch(`http://127.0.0.1:8000/api/notifications/?student_id=${studentId}&recipient=student`),
+					fetch(apiUrl(`/students/${studentId}/`)),
+					fetch(apiUrl(`/notifications/?student_id=${studentId}&recipient=student`)),
 				]);
 
 				if (!studentRes.ok) {
@@ -77,7 +78,7 @@ function Notification() {
 	const markAllRead = async () => {
 		try {
 			setProcessingAllRead(true);
-			await fetch('http://127.0.0.1:8000/api/notifications/mark-all-read/', {
+			await fetch(apiUrl('/notifications/mark-all-read/'), {
 				method: 'POST',
 				headers: { 'Content-Type': 'application/json' },
 				body: JSON.stringify({ student_id: studentId, recipient: 'student' }),
@@ -94,7 +95,7 @@ function Notification() {
 	const markRead = async (id) => {
 		try {
 			setProcessingReadId(id);
-			await fetch(`http://127.0.0.1:8000/api/notifications/${id}/read/`, { method: 'PATCH' });
+			await fetch(apiUrl(`/notifications/${id}/read/`), { method: 'PATCH' });
 			setNotifications((prev) => prev.map((n) => (n.id === id ? { ...n, read_status: true } : n)));
 		} catch (err) {
 			console.error(err);

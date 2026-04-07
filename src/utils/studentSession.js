@@ -1,3 +1,5 @@
+import { API_BASE_URL } from './backendUrls.js';
+
 export function getStudentSessionProfile() {
   const studentUser = JSON.parse(localStorage.getItem('studentUser') || '{}');
 
@@ -32,7 +34,7 @@ export function buildStudentApiUrl(path, params = {}) {
   });
 
   const query = search.toString();
-  return `http://127.0.0.1:8000/api/${basePath}${query ? `?${query}` : ''}`;
+  return `${API_BASE_URL}/${basePath}${query ? `?${query}` : ''}`;
 }
 
 export function withStudentScope(payload = {}) {

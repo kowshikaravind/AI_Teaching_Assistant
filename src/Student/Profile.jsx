@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import './Student.css';
 import { loadAppSettings, saveAppSettings, applyAppSettings } from '../utils/appSettings.js';
+import { apiUrl } from '../utils/backendUrls.js';
 
 function Profile() {
   const navigate = useNavigate();
@@ -36,7 +37,7 @@ function Profile() {
       }
 
       try {
-        const res = await fetch(`http://127.0.0.1:8000/api/students/${studentId}/`);
+        const res = await fetch(apiUrl(`/students/${studentId}/`));
         if (res.ok) {
           const data = await res.json();
           setStudent(data);
@@ -94,7 +95,7 @@ function Profile() {
 
     setPasswordLoading(true);
     try {
-      const res = await fetch('http://127.0.0.1:8000/api/student-change-password/', {
+      const res = await fetch(apiUrl('/student-change-password/'), {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({

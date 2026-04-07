@@ -1,3 +1,5 @@
+import { API_BASE_URL } from './backendUrls.js';
+
 export function getTeacherSessionProfile() {
   const teacherUser = JSON.parse(localStorage.getItem('teacherUser') || '{}');
 
@@ -28,8 +30,6 @@ export function buildTeacherApiUrl(endpoint, params = {}) {
   const teacherUser = JSON.parse(localStorage.getItem('teacherUser') || '{}');
   const assignedClass = teacherUser?.assigned_class || '';
   
-  const baseUrl = 'http://127.0.0.1:8000/api';
-
   const normalized = String(endpoint || '').replace(/^\/+/, '');
   const [path, existingQuery = ''] = normalized.split('?');
 
@@ -46,7 +46,7 @@ export function buildTeacherApiUrl(endpoint, params = {}) {
   }
   
   const queryString = queryParams.toString();
-  return `${baseUrl}/${path}${queryString ? `?${queryString}` : ''}`;
+  return `${API_BASE_URL}/${path}${queryString ? `?${queryString}` : ''}`;
 }
 
 /**

@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import '../App.css';
 import { getTeacherSessionProfile } from '../utils/teacherSession.js';
+import { apiUrl } from '../utils/backendUrls.js';
 
 function AddStudent() {
   const navigate = useNavigate();
@@ -73,7 +74,7 @@ function AddStudent() {
         return;
       }
       try {
-        const res = await fetch("http://127.0.0.1:8000/api/students/");
+        const res = await fetch(apiUrl('/students/'));
         const data = await res.json();
         const unique = [...new Set(data.map(s => s.class_name).filter(Boolean))].sort();
         setExistingClasses(unique);
@@ -115,8 +116,8 @@ function AddStudent() {
     };
 
     const url = isEditMode
-      ? `http://127.0.0.1:8000/api/students/${existingData.id}/`
-      : "http://127.0.0.1:8000/api/students/";
+      ? apiUrl(`/students/${existingData.id}/`)
+      : apiUrl('/students/');
     const method = isEditMode ? "PUT" : "POST";
 
     try {

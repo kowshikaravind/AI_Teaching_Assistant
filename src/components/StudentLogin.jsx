@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import './Login.css';
+import { apiUrl } from '../utils/backendUrls.js';
 
 function StudentLogin() {
   const navigate = useNavigate();
@@ -26,7 +27,7 @@ function StudentLogin() {
     setLoading(true);
 
     try {
-      const res = await fetch('http://127.0.0.1:8000/api/student-login/', {
+      const res = await fetch(apiUrl('/student-login/'), {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email, password }),
@@ -50,7 +51,7 @@ function StudentLogin() {
 
       setError(
         isConnectionRefused
-          ? 'Backend server is not running on http://127.0.0.1:8000. Start Django and try again.'
+          ? 'Backend server is not reachable. Check the deployed backend URL and try again.'
           : 'Server error. Please try again.'
       );
       console.error('Login error:', err);

@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useState } from 'react';
 import { buildStudentApiUrl } from '../utils/studentSession.js';
+import { backendUrl } from '../utils/backendUrls.js';
 import StudentTestInterface from './StudentTestInterface.jsx';
 import './StudentTestDetailModal.css';
 
@@ -111,7 +112,7 @@ export default function StudentTestDetailModal({ test, studentId, onClose, onTes
   const materialUrl = testInfo.study_material_url
     ? (String(testInfo.study_material_url).startsWith('http')
       ? testInfo.study_material_url
-      : `http://127.0.0.1:8000${testInfo.study_material_url}`)
+      : backendUrl(testInfo.study_material_url)
     : null;
 
   return (

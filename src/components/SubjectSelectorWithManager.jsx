@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
+import { apiUrl } from '../utils/backendUrls.js';
 
 function SubjectSelectorWithManager({
   value = '',
@@ -18,7 +19,7 @@ function SubjectSelectorWithManager({
 
   const fetchSubjects = useCallback(async () => {
     try {
-      const res = await fetch('http://127.0.0.1:8000/api/subjects/');
+      const res = await fetch(apiUrl('/subjects/'));
       const data = await res.json();
       setSubjects(Array.isArray(data) ? data : []);
     } catch (err) {
@@ -50,7 +51,7 @@ function SubjectSelectorWithManager({
     }
 
     try {
-      const res = await fetch('http://127.0.0.1:8000/api/subjects/', {
+      const res = await fetch(apiUrl('/subjects/'), {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ name: trimmed }),
@@ -76,7 +77,7 @@ function SubjectSelectorWithManager({
 
   const handleDeleteSubject = async (id) => {
     try {
-      await fetch(`http://127.0.0.1:8000/api/subjects/${id}/`, { method: 'DELETE' });
+      await fetch(apiUrl(`/subjects/${id}/`), { method: 'DELETE' });
       await fetchSubjects();
     } catch (err) {
       console.error('Failed to delete subject:', err);
