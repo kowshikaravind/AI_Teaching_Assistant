@@ -33,10 +33,17 @@ function AdminLogin() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ username, password }),
       });
-      const data = await res.json();
+
+      const contentType = res.headers.get('content-type') || '';
+      let data = null;
+      if (contentType.includes('application/json')) {
+        data = await res.json();
+      } else {
+        await res.text();
+      }
 
       if (!res.ok) {
-        setError(data.error || 'Admin login failed.');
+        setError(data?.error || `Admin login failed (${res.status}).`);
         return;
       }
 

@@ -1,16 +1,92 @@
-# React + Vite
+# Academic Performance Tracking System - Frontend
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+This frontend is the user-facing web application for the Academic Performance Tracking platform.
 
-Currently, two official plugins are available:
+It provides role-based experiences for Students, Teachers, and Admins, connected to the Django API backend.
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+## Project Purpose
 
-## React Compiler
+The UI is designed to support the complete academic monitoring workflow:
+- Students can view performance, upcoming tests, AI guidance, and notifications
+- Teachers can manage class-level student data and assessments
+- Admins can approve/reject teacher requests and maintain admin credentials
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+## Main Portals and Flows
 
-## Expanding the ESLint configuration
+### Student Portal
+- Dashboard summary
+- My Performance (charts, subject trends, recent marks)
+- Upcoming Tests (details, test interface, review)
+- AI Tutor (context-aware chat and recommendations)
+- Notifications
+- Profile and password updates
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+### Teacher Portal
+- Teacher login and registration request
+- Class-scoped student access
+- Test management and review utilities
+
+### Admin Portal
+- Admin login
+- View pending and approved teacher requests
+- Approve, reject, revoke teacher access
+- Update admin credentials
+
+## Frontend Architecture
+
+- Framework: React + Vite
+- Routing: React Router
+- Visual analytics: Chart.js and Recharts
+- API utilities:
+	- Central backend host management in src/utils/backendUrls.js
+	- Session-aware URL helpers in src/utils/studentSession.js and src/utils/teacherSession.js
+
+## Project Structure
+
+- src/components/ - Shared components and auth forms
+- src/pages/ - Admin page modules
+- src/Student/ - Student portal screens
+- src/teacherPortal/ - Teacher dashboard screens
+- src/utils/ - API/session/theme utilities
+
+## Environment Setup
+
+Create a .env file with:
+
+VITE_API_BASE_URL=http://127.0.0.1:8000
+
+For production, point this to deployed backend:
+
+VITE_API_BASE_URL=https://your-backend.onrender.com
+
+## Run and Build
+
+Local development:
+1. npm install
+2. npm run dev
+
+Production build:
+1. npm run build
+2. npm run preview
+
+## Deployment
+
+Recommended: Vercel
+
+- Build command: npm run build
+- Output directory: dist
+- Environment variable: VITE_API_BASE_URL
+
+The project includes vercel.json rewrite rules so client-side routes (example: /admin-login) resolve correctly in production.
+
+## Integration Notes
+
+Frontend and backend must be aligned for:
+- CORS origins
+- CSRF trusted origins
+- Correct backend base URL
+
+If API calls fail in browser but backend is running, verify:
+1. VITE_API_BASE_URL is correct
+2. Backend allows frontend origin in CORS/CSRF settings
+3. Deployed frontend has latest environment variables
